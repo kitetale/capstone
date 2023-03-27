@@ -129,9 +129,9 @@ void Fluid::update(float dt, Contour &contour){
         fluid.setDensityFromPressure(densityFromPressure);
 */
         if(contourInput){
-            fluid.addVelocity(contour.getOpticalFlowDecay());
-            fluid.addDensity(contour.getColorMask());
-            fluid.addTemperature(contour.getLuminanceMask());
+            fluid.setVelocity(contour.getOpticalFlowDecay());
+            fluid.setDensity(contour.getColorMask());
+            fluid.setTemperature(contour.getLuminanceMask());
         }
 
         fluid.update(dt);

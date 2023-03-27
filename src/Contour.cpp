@@ -97,7 +97,7 @@ void Contour::setup(int w, int h, float scale){
     contourFinderVelMask.setAutoThreshold(true); //auto threshold velocity mask
     
     // flow fbo
-    flowFbo.allocate(flowWidth, flowHeight, GL_RGBA);//, GL_RGB32F
+    flowFbo.allocate(flowWidth, flowHeight, GL_RGB32F);//, GL_RGB32F
     flowPixels.allocate(flowWidth, flowHeight, 3);
 
     // velocity mask

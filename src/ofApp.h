@@ -5,7 +5,7 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 #include "ofxFlowTools.h"
-//#include "ParticleSystem.h"
+#include "ParticleSystem.h"
 #include "Fluid.h"
 #include "Contour.h"
 
@@ -92,7 +92,7 @@ class ofApp : public ofBaseApp{
     
     // ----------------------------- FLUID -------------------------------
     Fluid fluid;
- /*
+ 
     // ------------------------ PARTICLE SYSTEM --------------------------
     ParticleSystem *emitterParticles;
     ParticleSystem *gridParticles;
@@ -100,7 +100,7 @@ class ofApp : public ofBaseApp{
     ParticleSystem *animationsParticles;
     vector<ParticleSystem *> particleSystems;
     int currentParticleSystem;
-  */
+  
     // ---------------------------- SOUND --------------------------------
     // ofSoundPlayer ambientSound; // if want to play ambient noise
     

@@ -49,6 +49,9 @@ ParticleSystem::ParticleSystem(){
     maxSpeed = 80.0;
     flockingRadius = 60.0;
     
+    //Animation
+    animation = RAIN;
+    
     // Graphic output
     sizeAge = false;
     opacityAge = false;

@@ -71,6 +71,7 @@ void ofApp::setup(){
     irErode = 1;
     irBlur = 21;
 
+    float scaleFactor = 4.0; // for fluid & flow computation
     // Contour init ----------------------------------------------------
     // SILHOUETTE CONTOUR
     contour.setup(w, h, sscale);
@@ -80,10 +81,8 @@ void ofApp::setup(){
     
 
     // Fluid init ------------------------------------------------------
-    float scaleFactor = 4.0; // for fluid & flow computation
-    fluid.setup(w, h, scaleFactor);
-    
-/*
+    fluid.setup(w, h, sscale);
+
     // Particle Init ---------------------------------------------------
     // MARKER PARTICLES
     emitterParticles = new ParticleSystem();
@@ -109,10 +108,10 @@ void ofApp::setup(){
     particleSystems.push_back(animationsParticles);
     currentParticleSystem = 0;
     
-*/
+
     // Transition ------------------------------------------------------
     // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(w, h, GL_RGBA); //GL_RGBA32F_ARB
+    fbo.allocate(w, h, GL_RGBA32F_ARB); //GL_RGBA32F_ARB
     fbo.begin();
     ofClear(255, 255, 255, 0);
     fbo.end();
@@ -204,18 +203,18 @@ void ofApp::update(){
     
     // Update fluid
     fluid.update(dt, contour);
-/*
+
     // Update particles
     emitterParticles->update(dt, contour, fluid); // TODO: check markers param
     gridParticles->update(dt, contour, fluid);
     boidsParticles->update(dt, contour, fluid);
     animationsParticles->update(dt, contour, fluid);
- */
+ 
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofSetColor(100);
+    ofSetColor(255);
     
     shader.begin();
     ofDrawRectangle(0,0,ofGetWidth(),ofGetHeight());
@@ -242,8 +241,9 @@ void ofApp::draw(){
     ofScale(sscale, sscale);
     
     if(useFBO){
+        fbo.clear();
         fbo.begin();
-
+        
         // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
         ofFill();
         ofSetColor(red, green, blue, ofMap(fadeAmount, 0, 100, 250, 0));
@@ -260,6 +260,7 @@ void ofApp::draw(){
         boidsParticles->draw();
         animationsParticles->draw();
 */
+        particleSystems[currentParticleSystem]->draw();
         fbo.end();
 
         // Draw buffer (graphics) on the screen
@@ -267,7 +268,7 @@ void ofApp::draw(){
         fbo.draw(0,0);
     }else{
         // Draw Graphics
-       contour.draw();
+       //contour.draw();
 
        fluid.draw();
 /*
@@ -275,7 +276,9 @@ void ofApp::draw(){
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
-  */
+ */
+        particleSystems[currentParticleSystem]->draw();
+  
     }
     
     ofPopStyle();
@@ -307,7 +310,20 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+    switch (key){
+        case '1':
+            currentParticleSystem = 1;
+            break;
+        case '2':
+            currentParticleSystem = 2;
+            break;
+        case '3':
+            currentParticleSystem = 3;
+            break;
+        default:
+            currentParticleSystem = 0;
+            break;
+    }
 }
 
 //--------------------------------------------------------------

@@ -8,7 +8,7 @@
 #include "Fluid.h"
 
 Fluid::Fluid(){
-    isActive = false;
+    isActive = true;
     particlesActive = false;
 
     activeStarted = false;
@@ -24,11 +24,11 @@ Fluid::Fluid(){
     maxOpacity = 255.0;
 
     //input
-    contourInput = false;// Fluid input is the depth contour?
+    contourInput = true;// Fluid input is the depth contour?
     
     // output
     drawVelocity = false;
-    drawVelocityScalar = false;
+    drawVelocityScalar = true;
     drawPressure = false;
     drawVorticity = false; //local spinning motion of a continuum near some point
     drawTemperature = false;
@@ -93,7 +93,7 @@ void Fluid::setup(int w, int h, float scale, bool internalFormat){
     fluidVelocities.allocate(flowWidth, flowHeight, 4);
 }
 
-void Fluid::update(float dt, Contour &contour, float mouseX, float mouseY){
+void Fluid::update(float dt, Contour &contour){
     if(isActive || isFadingOut){ 
         if (!activeStarted && !isFadingOut){
             activeStarted = true;
@@ -182,7 +182,7 @@ void Fluid::draw(){
             velocityField.draw(0, 0, w, h);
             ofPopStyle();
         }
-        if(drawVelocityScalar){
+        if(drawVelocityScalar){ // --> extends
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_DISABLED);
             /*displayScalar.setSource(fluid.getVelocity());
@@ -190,7 +190,7 @@ void Fluid::draw(){
             fluid.drawVelocity(0,0,w,h);
             ofPopStyle();
         }
-        if(drawPressure){
+        if(drawPressure){ // |||||||
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_DISABLED);
             /*displayScalar.setSource(fluid.getPressure());
@@ -198,7 +198,7 @@ void Fluid::draw(){
             fluid.drawPressure(0, 0, w, h);
             ofPopStyle();
         }
-        if(drawTemperature){
+        if(drawTemperature){ // .....
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_DISABLED);
             /*displayScalar.setSource(fluid.getTemperature());
@@ -206,7 +206,7 @@ void Fluid::draw(){
             fluid.drawTemperature(0, 0, w, h);
             ofPopStyle();
         }
-        if(drawVorticity){
+        if(drawVorticity){ // --> gone
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_DISABLED);
             /*displayScalar.setSource(fluid.getVorticity());
@@ -214,7 +214,7 @@ void Fluid::draw(){
             fluid.drawVorticity(0, 0, w, h);
             ofPopStyle();
         }
-        if(drawContourFluid){
+        if(drawContourFluid){ // scary horror vibe
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_ADD);
             ofSetColor(red, green, blue, opacity);

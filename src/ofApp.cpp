@@ -21,7 +21,7 @@ void ofApp::setup(){
     // loading vert & frag separately:
     //shader.load("myCrazyVertFile.vert", "myCrazyFragFile.frag");
     
-    //kinect.setRegistration(true);
+    kinect.setRegistration(true);
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
     flip = false;
@@ -77,12 +77,13 @@ void ofApp::setup(){
     
     contour.setMinAreaRadius(minContourSize);
     contour.setMaxAreaRadius(maxContourSize);
-    /*
+    
 
     // Fluid init ------------------------------------------------------
     float scaleFactor = 4.0; // for fluid & flow computation
     fluid.setup(w, h, scaleFactor);
     
+/*
     // Particle Init ---------------------------------------------------
     // MARKER PARTICLES
     emitterParticles = new ParticleSystem();
@@ -117,7 +118,7 @@ void ofApp::setup(){
     fbo.end();
 
     fadeAmount = 80;
-    useFBO = true;
+    useFBO = false;
 }
 
 void ofApp::exit() {
@@ -200,10 +201,10 @@ void ofApp::update(){
 
     // Update contour
     contour.update(dt, depthImage);
-    /*
-    // Update fluid
-    fluid.update(dt, contour, mouseX, mouseY); //TODO: check parameters
     
+    // Update fluid
+    fluid.update(dt, contour);
+/*
     // Update particles
     emitterParticles->update(dt, contour, fluid); // TODO: check markers param
     gridParticles->update(dt, contour, fluid);
@@ -264,12 +265,12 @@ void ofApp::draw(){
         // Draw buffer (graphics) on the screen
         ofSetColor(255);
         fbo.draw(0,0);
-    }
-    else{
+    }else{
         // Draw Graphics
        contour.draw();
+
+       fluid.draw();
 /*
-        fluid.draw();
         emitterParticles->draw();
         gridParticles->draw();
         boidsParticles->draw();

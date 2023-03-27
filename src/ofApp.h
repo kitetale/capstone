@@ -5,11 +5,8 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 #include "ofxFlowTools.h"
-/*
-#include "ParticleSystem.h"
+//#include "ParticleSystem.h"
 #include "Fluid.h"
- */
-
 #include "Contour.h"
 
 #define GESTURE_FOLLOWER
@@ -93,9 +90,9 @@ class ofApp : public ofBaseApp{
    // ----------------------------- CONTOUR -----------------------------
     Contour contour;
     
-/*    // ----------------------------- FLUID -------------------------------
+    // ----------------------------- FLUID -------------------------------
     Fluid fluid;
-    
+ /*
     // ------------------------ PARTICLE SYSTEM --------------------------
     ParticleSystem *emitterParticles;
     ParticleSystem *gridParticles;

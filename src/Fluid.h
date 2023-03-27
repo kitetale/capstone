@@ -16,7 +16,7 @@ class Fluid {
         Fluid();
         
         void setup(int w, int h, float scale = 4.0, bool internalFormat = false);
-        void update(float dt, Contour &contour, float mouseX, float mouseY);
+        void update(float dt, Contour &contour);
         void draw();
         
         ofVec2f getFluidOffset(ofPoint p);

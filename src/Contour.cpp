@@ -246,10 +246,7 @@ void Contour::update(float dt, ofImage &depthImage){
 }
 
 void Contour::draw(){
-    ofPushStyle();
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
     flowFbo.draw(0,0);
-    ofPopStyle();
     
     if(isActive || isFadingOut){
         ofPushMatrix();

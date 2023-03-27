@@ -87,10 +87,15 @@ class Fluid {
         float pMassRnd;
         float pSize;
         float pSizeRnd;
+    
+        ftPixelFlow pixelFlow;
+        ftAverageFlow avg;
         
     protected:
         ftFluidFlow fluid;
         ftParticleFlow fluidParticles;
+    
+        ftOpticalFlow opticalFlow;
         
         //ftOpticalFlow displayScalar;
         //ftSvFromVelocity displayScalar;

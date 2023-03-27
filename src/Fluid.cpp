@@ -76,6 +76,10 @@ void Fluid::setup(int w, int h, float scale, bool internalFormat){
     this->flowHeight = h/scale;
 
     fluid.setup(flowWidth,flowHeight, w, h); //fluid
+    
+    opticalFlow.setup(flowWidth, flowHeight);
+    pixelFlow.setup(flowWidth, flowHeight, FT_VELOCITY);
+    avg.setup(flowWidth, flowHeight, FT_VELOCITY);// avg
 
     fluidParticles.setup(flowWidth, flowHeight, w, h); //particle
 
@@ -128,9 +132,18 @@ void Fluid::update(float dt, Contour &contour){
         fluid.setDensityFromVorticity(densityFromVorticity);
         fluid.setDensityFromPressure(densityFromPressure);
 */
+        opticalFlow.setInput(contour.getTexture());
+        opticalFlow.update();
+        pixelFlow.setInput(fluid.getVelocity());
+        pixelFlow.update();
+        avg.update(pixelFlow.getPixels());
+        
         if(contourInput){
             fluid.setVelocity(contour.getOpticalFlowDecay());
-            fluid.addDensity(contour.getColorMask());
+            if (avg.getMagnitude()<1) {fluid.addDensity(contour.getColorMask(),0.1);}
+            
+            if (avg.getMagnitude()<=0.0005){ fluid.setDensity(contour.getColorMask());} //nothing in front of camera, then reset
+            
             fluid.setTemperature(contour.getLuminanceMask());
         }
 

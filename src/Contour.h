@@ -35,6 +35,8 @@ class Contour {
         void computeVelocities();
         void setMinAreaRadius(float minContourSize) {contourFinder.setMinAreaRadius(minContourSize);}
         void setMaxAreaRadius(float maxContourSize) {contourFinder.setMaxAreaRadius(maxContourSize);}
+    
+        ofTexture& getTexture(){return flowFbo.getTexture();}
         
         bool isActive;
         bool doFading;          // Do opacity fading?

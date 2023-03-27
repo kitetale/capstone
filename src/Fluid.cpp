@@ -87,7 +87,7 @@ void Fluid::setup(int w, int h, float scale, bool internalFormat){
     velocityField.setup(flowWidth/4, flowHeight/4);
 
     // allocate fluid FBO
-    fluidFbo.allocate(flowWidth, flowWidth, GL_RGBA32F);
+    fluidFbo.allocate(flowWidth, flowWidth, GL_RGBA32F); //
     
     // Allocate fluid pixels
     fluidVelocities.allocate(flowWidth, flowHeight, 4);

@@ -63,7 +63,7 @@ Contour::Contour(){
     drawTangentLines = false;
     
     //debug
-    drawFlow = false;
+    drawFlow = true;
     drawFlowScalar = false;
     drawVelMask = false;
     drawVelMask = false;
@@ -81,6 +81,7 @@ void Contour::setup(int w, int h, float scale){
     this->flowHeight = h/scale;
     
     opticalFlow.setup(flowWidth, flowHeight);
+
     opticalFlow.setStrength(100.0);
     velocityMask.setup(w,h);
     
@@ -96,19 +97,20 @@ void Contour::setup(int w, int h, float scale){
     contourFinderVelMask.setAutoThreshold(true); //auto threshold velocity mask
     
     // flow fbo
-    flowFbo.allocate(flowWidth, flowHeight, GL_RGB32F);
+    flowFbo.allocate(flowWidth, flowHeight, GL_RGBA);//, GL_RGB32F
     flowPixels.allocate(flowWidth, flowHeight, 3);
-    
+
     // velocity mask
     velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
-    velocityMaskFbo.allocate(flowWidth, flowHeight, GL_RGB32F);
+    velocityMaskFbo.allocate(flowWidth, flowHeight); //, GL_RGB32F
     
     // Fbo
-    coloredDepthFbo.allocate(w, h, GL_RGBA32F);
+    coloredDepthFbo.allocate(w, h);//, GL_RGBA32F
     
     coloredDepthFbo.begin();
     ofClear(255,255,255,0);
     coloredDepthFbo.end();
+
 }
 
 void Contour::update(float dt, ofImage &depthImage){
@@ -139,7 +141,7 @@ void Contour::update(float dt, ofImage &depthImage){
         flowFbo.readToPixels(flowPixels);
         
         // tint binary depth image (silhouette)
-        coloredDepthFbo.begin();
+       coloredDepthFbo.begin();
             ofPushStyle();
             ofClear(255, 255, 255, 0); // clear buffer
             if(vMaskRandomColor){ // tint image with random colors
@@ -153,6 +155,7 @@ void Contour::update(float dt, ofImage &depthImage){
             depthImage.draw(0, 0, w, h); // draw binary image in the buffer
             ofPopStyle();
         coloredDepthFbo.end();
+
         
         velocityMask.setDensity(coloredDepthFbo.getTexture()); // to change mask color
         //velocityMask.setVelocity(opticalFlow.getOpticalFlow());
@@ -161,7 +164,7 @@ void Contour::update(float dt, ofImage &depthImage){
         velocityMask.setBlurRadius(vMaskBlurRadius);
         velocityMask.update(dt);
         
-        // Save to velocityMask fbo and get its pixels to read velocities
+       // Save to velocityMask fbo and get its pixels to read velocities
         velocityMaskFbo.begin();
         ofPushStyle();
         ofClear(255, 255, 255, 0); // clear buffer
@@ -170,6 +173,7 @@ void Contour::update(float dt, ofImage &depthImage){
         velocityMaskFbo.end();
         
         velocityMaskFbo.readToPixels(velocityMaskPixels);
+
     }
     
     // Contour Finder in the depth Image
@@ -237,6 +241,8 @@ void Contour::update(float dt, ofImage &depthImage){
 }
 
 void Contour::draw(){
+    flowFbo.draw(0,0);
+    
     if(isActive || isFadingOut){
         ofPushMatrix();
         ofTranslate(w/2.0, h/2.0);

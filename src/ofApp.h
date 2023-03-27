@@ -1,13 +1,15 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxOpenCv.h"
 #include "ofxCv.h"
 #include "ofxKinect.h"
 #include "ofxFlowTools.h"
-
-
+/*
 #include "ParticleSystem.h"
 #include "Fluid.h"
+ */
+
 #include "Contour.h"
 
 #define GESTURE_FOLLOWER
@@ -19,8 +21,6 @@
 #define KINECT_CONNECTED
 
 
- 
-
 #define SCREEN_W 640
 #define SCREEN_H 480
 
@@ -30,6 +30,7 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
+        void exit();
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -89,10 +90,10 @@ class ofApp : public ofBaseApp{
     //ofxCv::ContourFinder irMarkerFinder;
     //ofxCv::RectTrackerFollower<irMarker> tracker;
     
-    // ----------------------------- CONTOUR -----------------------------
+   // ----------------------------- CONTOUR -----------------------------
     Contour contour;
     
-    // ----------------------------- FLUID -------------------------------
+/*    // ----------------------------- FLUID -------------------------------
     Fluid fluid;
     
     // ------------------------ PARTICLE SYSTEM --------------------------
@@ -102,7 +103,7 @@ class ofApp : public ofBaseApp{
     ParticleSystem *animationsParticles;
     vector<ParticleSystem *> particleSystems;
     int currentParticleSystem;
-    
+  */
     // ---------------------------- SOUND --------------------------------
     // ofSoundPlayer ambientSound; // if want to play ambient noise
     
@@ -116,4 +117,5 @@ class ofApp : public ofBaseApp{
     ofShader shader;
     ofTexture tex;
     
+    ofxCvColorImage colorImage;
 };

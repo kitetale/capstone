@@ -1,4 +1,5 @@
 #include "ofApp.h"
+
 using namespace ofxCv;
 using namespace cv;
 
@@ -7,6 +8,7 @@ using namespace cv;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    /*
     #ifdef TARGET_OPENGLES
         shader.load("shadersES2/shader");
     #else
@@ -15,11 +17,11 @@ void ofApp::setup(){
         }else{
             shader.load("shadersGL2/shader");
         }
-    #endif
+    #endif*/
     // loading vert & frag separately:
     //shader.load("myCrazyVertFile.vert", "myCrazyFragFile.frag");
     
-    ofSetFrameRate(60);
+    //kinect.setRegistration(true);
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
     flip = false;
@@ -33,6 +35,11 @@ void ofApp::setup(){
     //kinect.setLed(ofxKinect::LED_OFF);
     int w = kinect.width;
     int h = kinect.height;
+    sscale = 1;
+    
+    colorImage.allocate(w,h);
+    
+    ofSetFrameRate(60);
     
     time0 = ofGetElapsedTimef(); // init time
     red = 0; green = 0; blue = 0; // BACKGROUND COLOR
@@ -63,13 +70,15 @@ void ofApp::setup(){
     irDilates = 3;
     irErode = 1;
     irBlur = 21;
-    
+
     // Contour init ----------------------------------------------------
     // SILHOUETTE CONTOUR
     contour.setup(w, h, sscale);
+    
     contour.setMinAreaRadius(minContourSize);
     contour.setMaxAreaRadius(maxContourSize);
-    
+    /*
+
     // Fluid init ------------------------------------------------------
     float scaleFactor = 4.0; // for fluid & flow computation
     fluid.setup(w, h, scaleFactor);
@@ -99,16 +108,21 @@ void ofApp::setup(){
     particleSystems.push_back(animationsParticles);
     currentParticleSystem = 0;
     
-    
+*/
     // Transition ------------------------------------------------------
     // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(w, h, GL_RGBA32F_ARB);
+    fbo.allocate(w, h, GL_RGBA); //GL_RGBA32F_ARB
     fbo.begin();
     ofClear(255, 255, 255, 0);
     fbo.end();
 
     fadeAmount = 80;
-    useFBO = false;
+    useFBO = true;
+}
+
+void ofApp::exit() {
+    kinect.setCameraTiltAngle(0);
+    kinect.close();
 }
 
 //--------------------------------------------------------------
@@ -128,6 +142,8 @@ void ofApp::update(){
     // update kinect
     kinect.update();
     if(kinect.isFrameNew()){
+        colorImage.setFromPixels(kinect.getPixels());
+        
         depthOriginal.setFromPixels(kinect.getDepthPixels());
         if(flip) depthOriginal.mirror(false, true);
         irOriginal.setFromPixels(kinect.getPixels());
@@ -181,10 +197,10 @@ void ofApp::update(){
     // Update images
     irImage.update();
     depthImage.update();
-    
+
     // Update contour
     contour.update(dt, depthImage);
-    
+    /*
     // Update fluid
     fluid.update(dt, contour, mouseX, mouseY); //TODO: check parameters
     
@@ -193,17 +209,17 @@ void ofApp::update(){
     gridParticles->update(dt, contour, fluid);
     boidsParticles->update(dt, contour, fluid);
     animationsParticles->update(dt, contour, fluid);
-    
+ */
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    //ofSetColor(255);
-    /*
+    ofSetColor(100);
+    
     shader.begin();
     ofDrawRectangle(0,0,ofGetWidth(),ofGetHeight());
     shader.end();
-    */
+    
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -235,35 +251,57 @@ void ofApp::draw(){
         // Graphics
         ofNoFill();
         ofSetColor(255);
+
         contour.draw();
+/*
         emitterParticles->draw();
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
-        
+*/
         fbo.end();
 
         // Draw buffer (graphics) on the screen
         ofSetColor(255);
-        fbo.draw(0, 0);
+        fbo.draw(0,0);
     }
     else{
         // Draw Graphics
-        contour.draw();
+       contour.draw();
+/*
         fluid.draw();
         emitterParticles->draw();
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
+  */
     }
     
     ofPopStyle();
     ofPopMatrix();
+    
+//    colorImage.draw(0,0,windowWidth, windowHeight);
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    switch (key){
+        case OF_KEY_UP:
+            if (angle < 30) {
+                ++angle;
+            }
+            kinect.setCameraTiltAngle(angle);
+            break;
 
+        case OF_KEY_DOWN:
+            if (angle > -30) {
+                --angle;
+            }
+            kinect.setCameraTiltAngle(angle);
+            break;
+        default:
+            break;
+    }
 }
 
 //--------------------------------------------------------------

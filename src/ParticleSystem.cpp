@@ -25,7 +25,7 @@ ParticleSystem::ParticleSystem(){
     velocity = 0.0;
     radius = 3.0;
     lifetime = 5.0;
-    red = green = blue = 255.0;
+    red = green = blue = 100.0;
     
     nParticles = 300;
     bornRate = 5.0;
@@ -48,9 +48,6 @@ ParticleSystem::ParticleSystem(){
     alignmentStrength = 0.01f;
     maxSpeed = 80.0;
     flockingRadius = 60.0;
-    
-    //Animation
-    animation = RAIN;
     
     // Graphic output
     sizeAge = false;
@@ -78,29 +75,29 @@ ParticleSystem::ParticleSystem(){
     returnToOriginForce = 10.0;
     
     //Behavior
-    emit = false;
-    interact = false;
+    emit = true;
+    interact = true;
     flock = false;
-    flowInteraction = false;
-    fluidInteraction = false;
+    flowInteraction = true;
+    fluidInteraction = true;
     repulseInteraction = false;
     attractInteraction = false;
-    seekInteraction = false;
+    seekInteraction = true;
     gravityInteraction = false;
     bounceInteraction = false;
-    returnToOrigin = false;
+    returnToOrigin = true;
     
     //Input
     interactionForce = 100.0;
     interactionRadius = 80.0;
     
-    emitInMovement = false;
+    emitInMovement = true;
     emitAllTimeInside = true;
-    emitAllTimeContour = false;
+    emitAllTimeContour = true;
     
     useFlow = true;
     useFlowRegion = false;
-    useContourArea = false;
+    useContourArea = true;
     useContourVel = false;
 }
 

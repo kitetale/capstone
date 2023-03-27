@@ -130,7 +130,7 @@ void Fluid::update(float dt, Contour &contour){
 */
         if(contourInput){
             fluid.setVelocity(contour.getOpticalFlowDecay());
-            fluid.setDensity(contour.getColorMask());
+            fluid.addDensity(contour.getColorMask());
             fluid.setTemperature(contour.getLuminanceMask());
         }
 
@@ -139,7 +139,7 @@ void Fluid::update(float dt, Contour &contour){
         // Get fluid texture and save to pixels so we can operate with them
         fluidFbo.begin();
         ofPushStyle();
-        ofClear(255, 255, 255, 0); // clear buffer
+        ofClear(255, 255, 255); // clear buffer
         fluid.getVelocity().draw(0, 0, flowWidth, flowHeight);
         ofPopStyle();
         fluidFbo.end();
@@ -178,8 +178,7 @@ void Fluid::draw(){
         if(drawVelocity){
             ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_ADD);
-            velocityField.setVelocity(fluid.getVelocity());
-            velocityField.draw(0, 0, w, h);
+            fluid.drawDensity(0,0,w,h);
             ofPopStyle();
         }
         if(drawVelocityScalar){ // --> extends

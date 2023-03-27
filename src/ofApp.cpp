@@ -25,8 +25,8 @@ void ofApp::setup(){
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
     flip = false;
-    nearClipping = 500;
-    farClipping = 4000;
+    nearClipping = 50;
+    farClipping = 8000;
     nearThreshold = 255;
     farThreshold = 165;
     minContourSize = 20.0;
@@ -81,7 +81,7 @@ void ofApp::setup(){
     
 
     // Fluid init ------------------------------------------------------
-    fluid.setup(w, h, sscale);
+    fluid.setup(w, h, scaleFactor);
 
     // Particle Init ---------------------------------------------------
     // MARKER PARTICLES
@@ -111,9 +111,9 @@ void ofApp::setup(){
 
     // Transition ------------------------------------------------------
     // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(w, h, GL_RGBA32F_ARB); //GL_RGBA32F_ARB
+    fbo.allocate(w, h, GL_RGBA); //GL_RGBA32F_ARB
     fbo.begin();
-    ofClear(255, 255, 255, 0);
+    ofClear(0);
     fbo.end();
 
     fadeAmount = 80;
@@ -251,7 +251,7 @@ void ofApp::draw(){
 
         // Graphics
         ofNoFill();
-        ofSetColor(255);
+        ofSetColor(0xffffff);
 
         contour.draw();
 /*
@@ -267,6 +267,8 @@ void ofApp::draw(){
         ofSetColor(255);
         fbo.draw(0,0);
     }else{
+        ofSetColor(255, 255, 255);
+        //ofClear(255, 255, 255);
         // Draw Graphics
        //contour.draw();
 
@@ -277,6 +279,7 @@ void ofApp::draw(){
         boidsParticles->draw();
         animationsParticles->draw();
  */
+        emitterParticles->draw();
         particleSystems[currentParticleSystem]->draw();
   
     }

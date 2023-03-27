@@ -22,7 +22,9 @@ Contour::Contour(){
     elapsedFadeTime = 0.0;
     fadeTime = 1.2;
     
-    red = green = blue = 255.0;
+    red = 255.0;
+    green = 255.0;
+    blue = 255.0;
     
     opacity = 0.0; //current opacity of particles
     maxOpacity = 255.0; //max opacity value
@@ -97,18 +99,19 @@ void Contour::setup(int w, int h, float scale){
     contourFinderVelMask.setAutoThreshold(true); //auto threshold velocity mask
     
     // flow fbo
-    flowFbo.allocate(flowWidth, flowHeight, GL_RGB32F);//, GL_RGB32F
+    flowFbo.allocate(flowWidth, flowHeight, GL_RGBA, 4);//, GL_RGB32F
     flowPixels.allocate(flowWidth, flowHeight, 3);
 
     // velocity mask
     velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
-    velocityMaskFbo.allocate(flowWidth, flowHeight); //, GL_RGB32F
+    velocityMaskFbo.allocate(flowWidth, flowHeight, GL_RGB32F); //, GL_RGB32F
     
     // Fbo
-    coloredDepthFbo.allocate(w, h);//, GL_RGBA32F
+    coloredDepthFbo.allocate(w, h, GL_RGBA32F);//, GL_RGBA32F
     
     coloredDepthFbo.begin();
     ofClear(255,255,255,0);
+    ofSetColor(255, 255, 255);
     coloredDepthFbo.end();
 
 }
@@ -132,7 +135,8 @@ void Contour::update(float dt, ofImage &depthImage){
         // Save flow fbo and get its pixels to read velocities
         flowFbo.begin();
         ofPushStyle();
-        ofClear(255, 255, 255, 0); // clear buffer
+        ofClear(0); // clear buffer
+        ofSetColor(255, 255, 255);
         //opticalFlow.getOpticalFlowDecay().draw(0, 0, flowWidth, flowHeight);
         opticalFlow.drawInput(0,0,flowWidth,flowHeight); // replace above
         ofPopStyle();
@@ -143,7 +147,7 @@ void Contour::update(float dt, ofImage &depthImage){
         // tint binary depth image (silhouette)
        coloredDepthFbo.begin();
             ofPushStyle();
-            ofClear(255, 255, 255, 0); // clear buffer
+            ofClear(0); // clear buffer
             if(vMaskRandomColor){ // tint image with random colors
                 vMaskColor.setHsb(ofMap(ofNoise(ofGetElapsedTimef()*0.3), 0.1, 0.9, 0, 255, true), 255, 255);
                 vMaskRed = vMaskColor.r;
@@ -167,7 +171,8 @@ void Contour::update(float dt, ofImage &depthImage){
        // Save to velocityMask fbo and get its pixels to read velocities
         velocityMaskFbo.begin();
         ofPushStyle();
-        ofClear(255, 255, 255, 0); // clear buffer
+        ofClear(255, 255, 255); // clear buffer
+        ofSetColor(255, 255, 255);
         velocityMask.getVelocity().draw(0, 0, flowWidth, flowHeight);
         ofPopStyle();
         velocityMaskFbo.end();
@@ -241,7 +246,10 @@ void Contour::update(float dt, ofImage &depthImage){
 }
 
 void Contour::draw(){
+    ofPushStyle();
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
     flowFbo.draw(0,0);
+    ofPopStyle();
     
     if(isActive || isFadingOut){
         ofPushMatrix();
@@ -310,7 +318,7 @@ void Contour::draw(){
         if(drawTangentLines){
             ofPushStyle();
             ofSetLineWidth(1);
-            ofSetColor(255, 50);
+            ofSetColor(255, 255,255);
             for(int i = 0; i < contours.size(); i++){
                 float numPoints = contours[i].size();
                 float tangentLength = 100;
@@ -364,7 +372,8 @@ void Contour::draw(){
     }
     if(drawVelocities){
         ofPushStyle();
-        ofSetColor(255, 0, 0);
+        //ofSetColor(255, 0, 0);
+        ofSetColor(255, 255, 255, 255);
         ofSetLineWidth(1.5);
         for(int i = 0; i < contours.size(); i+=10){
             for(int p = 0; p < contours[i].size(); p++){

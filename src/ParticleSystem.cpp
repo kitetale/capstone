@@ -128,6 +128,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         lifetime = 1;
     } else if(particleMode == GRID){
         interact = true;
+        connectDist = 10.0;
         radiusRnd = 0.0;
         returnToOrigin = true;
         immortal = true;
@@ -141,8 +142,11 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         emitInMovement = true;
         opacityAge = true;
         flock = true;
+        repulse = true;
+        repulseDist = 20.0*radius;
         bounceDamping = false;
-        immortal = true;
+        wrapAround = false;
+        immortal = false;
         addParticles(nParticles);
     } else if(particleMode == ANIMATIONS){
         immortal = false;

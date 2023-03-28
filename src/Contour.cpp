@@ -85,7 +85,7 @@ void Contour::setup(int w, int h, float scale){
     opticalFlow.setup(flowWidth, flowHeight);
 
     opticalFlow.setStrength(100.0);
-    velocityMask.setup(w,h);
+    velocityMask.setup(flowWidth, flowHeight);
     
     displayScalar.setup(flowWidth, flowHeight);
     velocityField.setup(flowWidth/4, flowHeight/4);

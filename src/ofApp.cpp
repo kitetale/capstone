@@ -272,14 +272,13 @@ void ofApp::draw(){
         // Draw Graphics
        //contour.draw();
 
-       fluid.draw();
+       //fluid.draw();
 /*
         emitterParticles->draw();
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
  */
-        emitterParticles->draw();
         particleSystems[currentParticleSystem]->draw();
   
     }
@@ -315,16 +314,28 @@ void ofApp::keyPressed(int key){
 void ofApp::keyReleased(int key){
     switch (key){
         case '1':
-            currentParticleSystem = 1;
+            currentParticleSystem = 1;//grid
             break;
         case '2':
-            currentParticleSystem = 2;
+            currentParticleSystem = 2; //boid
             break;
         case '3':
+            currentParticleSystem = 3; //animation
+            break;
+        case '4':
             currentParticleSystem = 3;
+            animationsParticles->animation = SNOW;
+            break;
+        case '5':
+            currentParticleSystem = 3;
+            animationsParticles->animation = EXPLOSION;
+            break;
+        case '6':
+            currentParticleSystem = 3;
+            animationsParticles->animation = RAIN;
             break;
         default:
-            currentParticleSystem = 0;
+            currentParticleSystem = 0; //emitter
             break;
     }
 }

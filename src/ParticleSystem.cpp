@@ -8,7 +8,7 @@
 #include "ParticleSystem.h"
 
 ParticleSystem::ParticleSystem(){
-    isActive = false;
+    isActive = true;
     activeStarted = false;
     
     isFadingIn = false;
@@ -28,10 +28,10 @@ ParticleSystem::ParticleSystem(){
     red = green = blue = 100.0;
     
     nParticles = 300;
-    bornRate = 5.0;
+    bornRate = 2.0;
     
     // Emitter
-    emitterSize = 3.0;
+    emitterSize = 2.0;
     velocityRnd = 20.0;
     velocityMotion = 50.0;
     lifetimeRnd = 20.0;
@@ -58,8 +58,8 @@ ParticleSystem::ParticleSystem(){
     drawLine = false;
     drawStroke = false;
     strokeWidth = 1.2;
-    drawConnections = false;
-    connectDist = 15.0;
+    drawConnections = true;
+    connectDist = 10.0;
     connectWidth = 1.0;
     
     //Physics
@@ -88,17 +88,17 @@ ParticleSystem::ParticleSystem(){
     returnToOrigin = true;
     
     //Input
-    interactionForce = 100.0;
+    interactionForce = 80.0;
     interactionRadius = 80.0;
     
-    emitInMovement = true;
+    emitInMovement = false;
     emitAllTimeInside = true;
-    emitAllTimeContour = true;
+    emitAllTimeContour = false;
     
-    useFlow = true;
+    useFlow = false;
     useFlowRegion = false;
     useContourArea = true;
-    useContourVel = false;
+    useContourVel = true;
 }
 
 ParticleSystem::~ParticleSystem(){
@@ -121,6 +121,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         opacityAge = true;
         colorAge = true;
         velocity = 20;
+        lifetime = 1;
     } else if(particleMode == GRID){
         interact = true;
         radiusRnd = 0.0;
@@ -187,7 +188,7 @@ bool comparisonFunction(Particle * a, Particle * b) {
 
 void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
     // if is active or we are fading out, update particles
-   if(isActive || isFadingOut){ 
+   if(isActive || isFadingOut){
         if (!activeStarted && !isFadingOut){
             activeStarted = true;
             isFadingIn = true;
@@ -348,14 +349,14 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
 }
 
 void ParticleSystem::draw(){
-    if(isActive || isFadingOut){
+    if(isActive || isFadingOut || true){
         ofPushStyle();
 
         //Draw lines between near points
         if(drawConnections){
             ofPushStyle();
             float connectDistSq = connectDist*connectDist;
-            ofSetColor(ofColor(red, green, blue), opacity);
+            ofSetColor(ofColor(red, green, blue), 255);//opacity
             ofSetLineWidth(connectWidth);
             for(int i = 0; i < particles.size(); i++){
                 for(int j = i-1; j >= 0; j--){

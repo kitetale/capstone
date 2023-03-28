@@ -28,7 +28,7 @@ Fluid::Fluid(){
     
     // output
     drawVelocity = false;
-    drawVelocityScalar = true;
+    drawVelocityScalar = false;
     drawPressure = false;
     drawVorticity = false; //local spinning motion of a continuum near some point
     drawTemperature = false;
@@ -139,12 +139,12 @@ void Fluid::update(float dt, Contour &contour){
         avg.update(pixelFlow.getPixels());
         
         if(contourInput){
-            fluid.setVelocity(contour.getOpticalFlowDecay());
-            if (avg.getMagnitude()<1) {fluid.addDensity(contour.getColorMask(),0.1);}
+            fluid.setVelocity(contour.getOpticalFlowVelocity());
+            if (avg.getMagnitude()<1) {fluid.addDensity(contour.getDensityMask(),0.1);}
             
-            if (avg.getMagnitude()<=0.0005){ fluid.setDensity(contour.getColorMask());} //nothing in front of camera, then reset
+            if (avg.getMagnitude()<=0.0005){ fluid.setDensity(contour.getDensityMask());} //nothing in front of camera, then reset
             
-            fluid.setTemperature(contour.getLuminanceMask());
+            fluid.setTemperature(contour.getTemperatureMask());
         }
 
         fluid.update(dt);
@@ -172,7 +172,7 @@ void Fluid::update(float dt, Contour &contour){
             fluidParticles.setSize(pSize);
             fluidParticles.setSizeSpread(pSizeRnd);
             
-            if(contourInput) fluidParticles.addFlowVelocity(contour.getOpticalFlowDecay());
+            if(contourInput) fluidParticles.addFlowVelocity(contour.getOpticalFlowVelocity());
             fluidParticles.addFluidVelocity(fluid.getVelocity());
         }
         fluidParticles.update(dt);

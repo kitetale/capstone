@@ -11,7 +11,6 @@
 #include "ofMain.h"
 #include "ofxCv.h"
 #include "ofxFlowTools.h"
-#include "ofxSyphon.h"
 
 using namespace flowTools;
 
@@ -25,9 +24,9 @@ class Contour {
         ofVec2f getFlowOffset(ofPoint p);
         ofPoint getVelocityInPoint(ofPoint curPoint);
 
-        ofTexture& getOpticalFlowDecay() {return opticalFlow.getVelocity();}
-        ofTexture& getLuminanceMask() {return velocityMask.getDensity();} // TODO: fix
-        ofTexture& getColorMask() {return velocityMask.getTemperature();} // TODO: fix
+        ofTexture& getOpticalFlowVelocity() {return opticalFlow.getVelocity();}
+        ofTexture& getDensityMask() {return velocityMask.getDensity();}
+        ofTexture& getTemperatureMask() {return velocityMask.getTemperature();}
 
         float getFlowWidth() {return flowWidth;}
         float getFlowHeight() {return flowHeight;}

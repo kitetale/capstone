@@ -126,6 +126,7 @@ void ofApp::setup(){
     useFBO = false;
     
     drawContour = false;
+    resetParticle = false;
 }
 
 void ofApp::exit() {
@@ -221,6 +222,13 @@ void ofApp::update(){
     fallParticles->update(dt, contour, fluid);
      */
     particleSystems[currentParticleSystem]->update(dt,contour,fluid);
+    
+    if (resetParticle){
+        particleSystems[4] = new ParticleSystem();
+        particleSystems[4]->setup(FALL, kinect.width, kinect.height);
+        
+        resetParticle = false;
+    }
  
 }
 
@@ -345,8 +353,12 @@ void ofApp::keyReleased(int key){
             boidsParticles->drawConnections = !boidsParticles->drawConnections;
             animationsParticles->drawConnections = !animationsParticles->drawConnections;
             fallParticles->drawConnections = !fallParticles->drawConnections;
+            break;
         case 'd':
             drawContour = !drawContour;
+            break;
+        case 'r':
+            resetParticle = true;
             break;
         default:
             break;

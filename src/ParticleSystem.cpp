@@ -199,6 +199,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         interact = true;
         flowInteraction = true;
         fluidInteraction = false;
+        seekInteraction = false;
         connectDist = 10.0;
         radiusRnd = 0.0;
         returnToOrigin = false;
@@ -265,7 +266,16 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
 
                     if(flowInteraction){
                         ofPoint frc = contour.getFlowOffset(particles[i]->pos);
-                        particles[i]->addForce(frc*interactionForce);
+                        if (frc != ofPoint(0,0)){
+                            particles[i]->isTouched = true;
+                        }
+                        if (particleMode == FALL){
+                            if(particles[i]->isTouched){
+                                particles[i]->force.set(ofPoint(0.0, 500.0)*particles[i]->mass);
+                            }
+                        }else{
+                            particles[i]->addForce(frc*interactionForce);
+                        }
                     }
 
                     if(closestPointInContour != ofPoint(-1, -1)){

@@ -13,7 +13,7 @@ using namespace cv;
 
 
 Contour::Contour(){
-    isActive = false;
+    isActive = true;
     
     isFadingIn = false; //opacity fading in
     isFadingOut = false; //opacity fading out
@@ -45,7 +45,9 @@ Contour::Contour(){
     //velocity mask
     vMaskBlurPasses = 1; // 0 ~ 10
     vMaskBlurRadius = 5.0; // 0 ~ 10
-    vMaskRed = vMaskGreen = vMaskBlue = 255.0;
+    vMaskRed = 255.0;
+    vMaskGreen = 255.0;
+    vMaskBlue = 255.0;
     vMaskOpacity = 255.0;
     vMaskColor = ofColor(vMaskRed, vMaskGreen, vMaskBlue);
     vMaskRandomColor = false;
@@ -65,7 +67,7 @@ Contour::Contour(){
     drawTangentLines = false;
     
     //debug
-    drawFlow = true;
+    drawFlow = false;
     drawFlowScalar = false;
     drawVelMask = false;
     drawVelMask = false;
@@ -99,8 +101,8 @@ void Contour::setup(int w, int h, float scale){
     contourFinderVelMask.setAutoThreshold(true); //auto threshold velocity mask
     
     // flow fbo
-    flowFbo.allocate(flowWidth, flowHeight, GL_RGBA, 4);//, GL_RGB32F
-    flowPixels.allocate(flowWidth, flowHeight, 3);
+    flowFbo.allocate(flowWidth, flowHeight, GL_RGB32F);//, GL_RGB32F
+    flowPixels.allocate(flowWidth, flowHeight, GL_RGB32F);
 
     // velocity mask
     velocityMaskPixels.allocate(flowWidth, flowHeight, 4);
@@ -137,6 +139,7 @@ void Contour::update(float dt, ofImage &depthImage){
         ofPushStyle();
         ofClear(0); // clear buffer
         ofSetColor(255, 255, 255);
+        ofFill();
         //opticalFlow.getOpticalFlowDecay().draw(0, 0, flowWidth, flowHeight);
         opticalFlow.drawInput(0,0,flowWidth,flowHeight); // replace above
         ofPopStyle();
@@ -246,8 +249,6 @@ void Contour::update(float dt, ofImage &depthImage){
 }
 
 void Contour::draw(){
-    flowFbo.draw(0,0);
-    
     if(isActive || isFadingOut){
         ofPushMatrix();
         ofTranslate(w/2.0, h/2.0);
@@ -266,7 +267,7 @@ void Contour::draw(){
                 ofDrawRectangle(boundingRects[i]);
             ofPopStyle();
         }
-        if(drawConvexHull){
+        if(drawConvexHull ){
             ofPushStyle();
             ofFill();
             ofSetColor(ofColor(red, green, blue), opacity);
@@ -280,7 +281,7 @@ void Contour::draw(){
             ofPopStyle();
         }
 
-        if(drawConvexHullLine){
+        if(drawConvexHullLine ){
             ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(lineWidth);
@@ -289,7 +290,7 @@ void Contour::draw(){
             ofPopStyle();
         }
         
-        if(drawSilhouette){
+        if(drawSilhouette || true){
             ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < contours.size(); i++){
@@ -302,7 +303,7 @@ void Contour::draw(){
             ofPopStyle();
         }
 
-        if(drawSilhouetteLine){
+        if(drawSilhouetteLine || true){
             ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             ofSetLineWidth(lineWidth);

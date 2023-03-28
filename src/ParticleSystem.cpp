@@ -92,7 +92,7 @@ ParticleSystem::ParticleSystem(){
     
     //Input
     interactionForce = 80.0;
-    interactionRadius = 80.0;
+    interactionRadius = 20.0;
     
     //Emitter
     emitInMovement = false;
@@ -103,6 +103,8 @@ ParticleSystem::ParticleSystem(){
     useFlowRegion = false;
     useContourArea = false;
     useContourVel = false;
+    
+    particles.clear();
 }
 
 ParticleSystem::~ParticleSystem(){

@@ -56,7 +56,7 @@ class ofApp : public ofBaseApp{
     
     float time0; //current time
     
-    float red, green, blue;
+    float red, green, blue; //background color
     bool bgGradient;
     
     //----------------------- KINECT DEPTH IMG ---------------------------
@@ -115,4 +115,6 @@ class ofApp : public ofBaseApp{
     ofTexture tex;
     
     ofxCvColorImage colorImage;
+    
+    bool drawContour;
 };

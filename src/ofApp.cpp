@@ -42,7 +42,7 @@ void ofApp::setup(){
     ofSetFrameRate(60);
     
     time0 = ofGetElapsedTimef(); // init time
-    red = 0; green = 0; blue = 0; // BACKGROUND COLOR
+    red = 70; green = 70; blue = 70; // BACKGROUND COLOR
     bgGradient = false;
     
     // ALLOCATE IMAGES
@@ -111,13 +111,15 @@ void ofApp::setup(){
 
     // Transition ------------------------------------------------------
     // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(w, h, GL_RGBA); //GL_RGBA32F_ARB
+    fbo.allocate(w, h, GL_RGBA32F_ARB); //GL_RGBA32F_ARB
     fbo.begin();
-    ofClear(0);
+    ofClear(255,255,255,0);
     fbo.end();
 
     fadeAmount = 80;
     useFBO = false;
+    
+    drawContour = false;
 }
 
 void ofApp::exit() {
@@ -214,7 +216,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofSetColor(255);
+    ofSetColor(255,255,255);
     
     shader.begin();
     ofDrawRectangle(0,0,ofGetWidth(),ofGetHeight());
@@ -267,10 +269,8 @@ void ofApp::draw(){
         ofSetColor(255);
         fbo.draw(0,0);
     }else{
-        ofSetColor(255, 255, 255);
-        //ofClear(255, 255, 255);
         // Draw Graphics
-       //contour.draw();
+        if(drawContour) {contour.draw();}
 
        //fluid.draw();
 /*
@@ -342,6 +342,9 @@ void ofApp::keyReleased(int key){
             gridParticles->drawConnections = !gridParticles->drawConnections;
             boidsParticles->drawConnections = !boidsParticles->drawConnections;
             animationsParticles->drawConnections = !animationsParticles->drawConnections;
+        case 'd':
+            drawContour = !drawContour;
+            break;
         default:
             break;
     }

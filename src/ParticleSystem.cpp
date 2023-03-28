@@ -10,6 +10,7 @@
 ParticleSystem::ParticleSystem(){
     isActive = true;
     activeStarted = false;
+    contourInput = true;
     
     isFadingIn = false;
     isFadingOut = false;
@@ -82,7 +83,7 @@ ParticleSystem::ParticleSystem(){
     interact = true;
     flock = false;
     flowInteraction = true;
-    fluidInteraction = true;
+    fluidInteraction = false;
     repulseInteraction = false;
     attractInteraction = false;
     seekInteraction = true;
@@ -130,6 +131,8 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         lifetime = 1;
     } else if(particleMode == GRID){
         interact = true;
+        flowInteraction = true;
+        fluidInteraction = true;
         connectDist = 10.0;
         radiusRnd = 0.0;
         returnToOrigin = true;
@@ -192,6 +195,19 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
             opacityAge = false;
             addParticles(nParticles);
         }
+    } else if (particleMode == FALL){
+        interact = true;
+        flowInteraction = true;
+        fluidInteraction = false;
+        connectDist = 10.0;
+        radiusRnd = 0.0;
+        returnToOrigin = false;
+        immortal = true;
+        velocity = 0.0;
+        velocityRnd = 0.0;
+        gravity = ofPoint(0,0);
+        friction = 100;
+        createParticleGrid(width, height);
     }
 }
 
@@ -288,7 +304,7 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
                 particles[i]->maxSpeed              =   maxSpeed;
             } 
 
-            if(returnToOrigin && particleMode == GRID && !gravityInteraction) {particles[i]->returnToOrigin(100, returnToOriginForce);}
+            if(returnToOrigin && (particleMode == GRID || particleMode==FALL) && !gravityInteraction) {particles[i]->returnToOrigin(100, returnToOriginForce);}
 
             if(particleMode == ANIMATIONS && animation == SNOW){
                 float windX = ofSignedNoise(particles[i]->pos.x * 0.003, particles[i]->pos.y * 0.006, ofGetElapsedTimef() * 0.1) * 3.0;
@@ -408,7 +424,7 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
     newParticle->w = w;
     newParticle->h = h;
 
-    if (particleMode == GRID || particleMode == BOIDS){
+    if (particleMode == GRID || particleMode == BOIDS || particleMode == FALL){
         newParticle->immortal = true;
 
         if (particleMode == BOIDS){

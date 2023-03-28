@@ -11,7 +11,7 @@
 #include "Contour.h"
 #include "Fluid.h"
 
-enum ParticleMode {EMITTER, BOIDS, GRID, RANDOM, ANIMATIONS};
+enum ParticleMode {EMITTER, BOIDS, GRID, RANDOM, ANIMATIONS, FALL};
 enum InputSource {CONTOUR};
 enum Animation {SNOW, RAIN, EXPLOSION};
 

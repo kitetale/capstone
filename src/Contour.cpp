@@ -290,7 +290,7 @@ void Contour::draw(){
             ofPopStyle();
         }
         
-        if(drawSilhouette || true){
+        if(drawSilhouette){
             ofPushStyle();
             ofSetColor(ofColor(red, green, blue), opacity);
             for(int i = 0; i < contours.size(); i++){

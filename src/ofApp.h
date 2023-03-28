@@ -98,6 +98,7 @@ class ofApp : public ofBaseApp{
     ParticleSystem *gridParticles;
     ParticleSystem *boidsParticles;
     ParticleSystem *animationsParticles;
+    ParticleSystem *fallParticles;
     vector<ParticleSystem *> particleSystems;
     int currentParticleSystem;
   

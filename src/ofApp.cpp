@@ -25,8 +25,9 @@ void ofApp::setup(){
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
     flip = false;
-    nearClipping = 50;
-    farClipping = 8000;
+    nearClipping = 20;
+    farClipping = 4000;
+    kinect.setDepthClipping(nearClipping,farClipping);
     nearThreshold = 255;
     farThreshold = 165;
     minContourSize = 20.0;
@@ -101,12 +102,17 @@ void ofApp::setup(){
     animationsParticles->animation = RAIN;
     animationsParticles->setup(ANIMATIONS, w, h);
     
+    // Crystal Fall PARTICLES
+    fallParticles = new ParticleSystem();
+    fallParticles->setup(FALL, w, h);
+    
     // VECTOR OF PARTICLE SYSTEMS
     particleSystems.push_back(emitterParticles);
     particleSystems.push_back(gridParticles);
     particleSystems.push_back(boidsParticles);
     particleSystems.push_back(animationsParticles);
-    currentParticleSystem = 0;
+    particleSystems.push_back(fallParticles);
+    currentParticleSystem = 4;
     
 
     // Transition ------------------------------------------------------
@@ -207,10 +213,14 @@ void ofApp::update(){
     fluid.update(dt, contour);
 
     // Update particles
-    emitterParticles->update(dt, contour, fluid); // TODO: check markers param
+    /*
+    emitterParticles->update(dt, contour, fluid);
     gridParticles->update(dt, contour, fluid);
     boidsParticles->update(dt, contour, fluid);
     animationsParticles->update(dt, contour, fluid);
+    fallParticles->update(dt, contour, fluid);
+     */
+    particleSystems[currentParticleSystem]->update(dt,contour,fluid);
  
 }
 
@@ -323,25 +333,18 @@ void ofApp::keyReleased(int key){
             currentParticleSystem = 2; //boid
             break;
         case '3':
-            currentParticleSystem = 3; //animation
-            break;
-        case '4':
-            currentParticleSystem = 3;
+            currentParticleSystem = 3; // animation
             animationsParticles->animation = SNOW;
             break;
-        case '5':
-            currentParticleSystem = 3;
-            animationsParticles->animation = EXPLOSION;
-            break;
-        case '6':
-            currentParticleSystem = 3;
-            animationsParticles->animation = RAIN;
+        case '4':
+            currentParticleSystem = 4; //fall
             break;
         case 'c':
             emitterParticles->drawConnections = !emitterParticles->drawConnections;
             gridParticles->drawConnections = !gridParticles->drawConnections;
             boidsParticles->drawConnections = !boidsParticles->drawConnections;
             animationsParticles->drawConnections = !animationsParticles->drawConnections;
+            fallParticles->drawConnections = !fallParticles->drawConnections;
         case 'd':
             drawContour = !drawContour;
             break;

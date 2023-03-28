@@ -25,10 +25,13 @@ ParticleSystem::ParticleSystem(){
     velocity = 0.0;
     radius = 3.0;
     lifetime = 5.0;
-    red = green = blue = 100.0;
+    // light purple pink (#FABEFF)
+    red = 250.0;
+    green = 190.0;
+    blue = 255.0;
     
     nParticles = 300;
-    bornRate = 2.0;
+    bornRate = 5.0;
     
     // Emitter
     emitterSize = 2.0;
@@ -59,7 +62,7 @@ ParticleSystem::ParticleSystem(){
     drawStroke = false;
     strokeWidth = 1.2;
     drawConnections = true;
-    connectDist = 10.0;
+    connectDist = 30.0;
     connectWidth = 1.0;
     
     //Physics
@@ -75,7 +78,7 @@ ParticleSystem::ParticleSystem(){
     returnToOriginForce = 10.0;
     
     //Behavior
-    emit = true;
+    emit = false;
     interact = true;
     flock = false;
     flowInteraction = true;
@@ -91,14 +94,15 @@ ParticleSystem::ParticleSystem(){
     interactionForce = 80.0;
     interactionRadius = 80.0;
     
+    //Emitter
     emitInMovement = false;
-    emitAllTimeInside = true;
+    emitAllTimeInside = false;
     emitAllTimeContour = false;
     
     useFlow = false;
     useFlowRegion = false;
-    useContourArea = true;
-    useContourVel = true;
+    useContourArea = false;
+    useContourVel = false;
 }
 
 ParticleSystem::~ParticleSystem(){
@@ -133,6 +137,9 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         friction = 100;
         createParticleGrid(width, height); 
     } else if(particleMode == BOIDS){
+        emitAllTimeContour = false;
+        emitInMovement = true;
+        opacityAge = true;
         flock = true;
         bounceDamping = false;
         immortal = true;

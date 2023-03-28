@@ -313,6 +313,9 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     switch (key){
+        case '0':
+            currentParticleSystem = 0; //emitter
+            break;
         case '1':
             currentParticleSystem = 1;//grid
             break;
@@ -334,8 +337,12 @@ void ofApp::keyReleased(int key){
             currentParticleSystem = 3;
             animationsParticles->animation = RAIN;
             break;
+        case 'c':
+            emitterParticles->drawConnections = !emitterParticles->drawConnections;
+            gridParticles->drawConnections = !gridParticles->drawConnections;
+            boidsParticles->drawConnections = !boidsParticles->drawConnections;
+            animationsParticles->drawConnections = !animationsParticles->drawConnections;
         default:
-            currentParticleSystem = 0; //emitter
             break;
     }
 }

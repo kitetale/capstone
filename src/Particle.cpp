@@ -90,9 +90,10 @@ void Particle::update(float dt){
         if (bounces) {marginBounce();}
         else if (steers) {marginSteer();}
         else if (wrapAround) {marginWrap();}
+        
     }
 }
-
+ 
 void Particle::draw(){
     if (isAlive){
         ofPushStyle();
@@ -125,6 +126,90 @@ void Particle::draw(){
         ofPopStyle();
     }
 }
+
+//------------------------------------------------------------------------------
+void Particle::follow(vector<ofPolyline> contours, float r){
+    ofPoint predictVel = this->vel;
+    predictVel.normalize();
+    predictVel *= 50; //seeing where this goes in 50 frames, arbitrary num
+    ofPoint predictPos = this->pos + predictVel;
+
+    ofPoint normal, target;
+
+    float shortest = 1000000;
+
+     for(int i=0; i<contours.size(); i++){
+        ofPolyline ct;
+        ct = contours[i];
+
+        auto pts = ct.getVertices();
+
+        for (int j=0; j<pts.size()-1; j++){
+            ofPoint a = pts[j];
+            ofPoint b = pts[j+1];
+            ofPoint normalpt = getNormalPoint(predictPos, a, b);
+
+            if (normalpt.x < a.x || normalpt.x > b.x){
+                // if off, set normal to be end of line
+                normalpt = b;
+            }
+
+            float dist = predictPos.distance(normalpt);
+            if (dist < shortest){
+                shortest = dist;
+                normal = normalpt;
+                ofPoint dir = b-a;
+                dir.normalize();
+                dir *= 10; //TODO
+                //ofPoint redir = this->vel.dot()
+                target = normalpt + dir;
+            }
+
+            if (shortest > r){
+                seek(target);
+            }
+        }
+    }
+}
+
+ofPoint Particle::getNormalPoint(ofPoint p, ofPoint a, ofPoint b){
+    ofPoint ap = p-a;
+    ofPoint ab = b-a;
+    ab.normalize();
+    ab *= ap.dot(ab);
+    ofPoint normalpt = a+ab;
+    return normalpt;
+}
+/*
+void Particle::update(){
+    this->vel += this->accel;
+    this->vel.limit(maxSpeed);
+    this->pos += this->vel;
+    this->accel *= 0;
+}
+*/
+void Particle::applyForce(ofPoint force){
+    this->accel += force;
+}
+
+void Particle::seek(ofPoint target){
+    if (target.distance(this->pos)<0.1) return; //already there
+    ofPoint dir = target - this->pos;
+
+    dir.normalize();
+    dir *= maxSpeed;
+
+    ofPoint steer = dir - this->vel;
+    steer.limit(maxForce);
+    
+    applyForce(steer);
+}
+
+
+
+//------------------------------------------------------------------------------
+
+
 
 void Particle::addForce(ofPoint newForce){
     force += newForce;

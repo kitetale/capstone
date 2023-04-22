@@ -105,6 +105,8 @@ ParticleSystem::ParticleSystem(){
     useContourArea = false;
     useContourVel = false;
     
+    contourRadius = 15;
+    
     particles.clear();
 }
 
@@ -115,6 +117,16 @@ ParticleSystem::~ParticleSystem(){
         particles.at(i) = NULL;
     }
     particles.clear();
+}
+
+void ParticleSystem::setup(float w, float h, ofPoint initPos, float maxForce, float maxSpeed){
+    this->initPos = initPos;
+    this->w = w;
+    this->h = h;
+    this->maxForce = maxForce;
+    this->maxSpeed = maxSpeed;
+
+    addParticles(this->nParticles);
 }
 
 void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
@@ -200,7 +212,7 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         flowInteraction = true;
         fluidInteraction = false;
         seekInteraction = false;
-        connectDist = 10.0;
+        connectDist = 20.0;
         radiusRnd = 0.0;
         returnToOrigin = false;
         immortal = true;
@@ -215,8 +227,25 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
 bool comparisonFunction(Particle * a, Particle * b) {
     return a->pos.x < b->pos.x;
 }
+/*
+void ParticleSystem::update(vector<ofPolyline> c){ //for boid
+    //sort particles for more effective particle/particle interactions
+    //sort(particles.begin(), particles.end(), comparisonFunction);
 
-void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
+     for (int i=0; i < particles.size(); i++){
+        particles[i]->follow(c,contourRadius);
+        particles[i]->update();
+     }
+}
+
+void ParticleSystem::draw(){
+    for(int i = 0; i < particles.size(); i++){
+        particles[i]->draw();
+    }
+}
+*/
+
+void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid, vector<ofPolyline> c){
     // if is active or we are fading out, update particles
    if(isActive || isFadingOut){
         if (!activeStarted && !isFadingOut){
@@ -374,6 +403,11 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
             }
 
             if(gravityInteraction) particles[i]->bounces = true;
+            
+            // BOID FOLLOW PATH
+           particles[i]->follow(c,contourRadius);
+           //particles[i]->update(dt);
+            
 
             particles[i]->update(dt);
         }

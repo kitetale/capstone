@@ -24,7 +24,7 @@ void ofApp::setup(){
     kinect.setRegistration(true);
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
-    flip = false;
+    flip = true;
     nearClipping = 20;
     farClipping = 4000;
     kinect.setDepthClipping(nearClipping,farClipping);
@@ -112,7 +112,7 @@ void ofApp::setup(){
     particleSystems.push_back(boidsParticles);
     particleSystems.push_back(animationsParticles);
     particleSystems.push_back(fallParticles);
-    currentParticleSystem = 4;
+    currentParticleSystem = 2;
     
 
     // Transition ------------------------------------------------------
@@ -126,6 +126,7 @@ void ofApp::setup(){
     useFBO = false;
     
     drawContour = false;
+    drawFluid = false;
     resetParticle = false;
 }
 
@@ -221,12 +222,23 @@ void ofApp::update(){
     animationsParticles->update(dt, contour, fluid);
     fallParticles->update(dt, contour, fluid);
      */
-    particleSystems[currentParticleSystem]->update(dt,contour,fluid);
+    particleSystems[currentParticleSystem]->update(dt,contour,fluid,contour.contours);
+   // particleSystems[2]->update(contour.contours);
     
     if (resetParticle){
+     //   particleSystems[1] = new ParticleSystem();
+     //   particleSystems[1]->setup(GRID, kinect.width, kinect.height);
+        
+        particleSystems[2] = new ParticleSystem();
+        particleSystems[2]->setup(BOIDS, kinect.width, kinect.height);
+        
+     /*   particleSystems[3] = new ParticleSystem();
+        particleSystems[3]->animation = RAIN;
+        particleSystems[3]->setup(ANIMATIONS, kinect.width, kinect.height);
+        
         particleSystems[4] = new ParticleSystem();
         particleSystems[4]->setup(FALL, kinect.width, kinect.height);
-        
+        */
         resetParticle = false;
     }
  
@@ -290,14 +302,15 @@ void ofApp::draw(){
         // Draw Graphics
         if(drawContour) {contour.draw();}
 
-       //fluid.draw();
+        if(drawFluid) {fluid.draw();}
+        else {particleSystems[currentParticleSystem]->draw();}
 /*
         emitterParticles->draw();
         gridParticles->draw();
         boidsParticles->draw();
         animationsParticles->draw();
  */
-        particleSystems[currentParticleSystem]->draw();
+        
   
     }
     
@@ -348,11 +361,9 @@ void ofApp::keyReleased(int key){
             currentParticleSystem = 4; //fall
             break;
         case 'c':
-            emitterParticles->drawConnections = !emitterParticles->drawConnections;
-            gridParticles->drawConnections = !gridParticles->drawConnections;
-            boidsParticles->drawConnections = !boidsParticles->drawConnections;
-            animationsParticles->drawConnections = !animationsParticles->drawConnections;
-            fallParticles->drawConnections = !fallParticles->drawConnections;
+            for (int i=0; i<particleSystems.size(); ++i){
+                particleSystems[i]->drawConnections = !particleSystems[i]->drawConnections;
+            }
             break;
         case 'd':
             drawContour = !drawContour;
@@ -360,6 +371,8 @@ void ofApp::keyReleased(int key){
         case 'r':
             resetParticle = true;
             break;
+        case 'f':
+            drawFluid = !drawFluid;
         default:
             break;
     }

@@ -22,8 +22,10 @@ class ParticleSystem
         ~ParticleSystem();
 
         void setup(ParticleMode particleMode, int width, int height);
-        void update(float dt, Contour& contour, Fluid& fluid);
+        void update(float dt, Contour& contour, Fluid& fluid, vector<ofPolyline> c);
         void draw();
+        void setup(float w, float h, ofPoint initPos, float maxForce, float maxSpeed);
+        void update(vector<ofPolyline> c);
         
         void addParticle(ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime);
         void addParticles(int n);
@@ -37,6 +39,9 @@ class ParticleSystem
         void resetTouchedParticles();
 
         void setAnimation(Animation animation);
+    
+    ofPoint initPos;
+    float maxForce;
     
         
         bool isActive;          // is Particle System active
@@ -141,6 +146,8 @@ class ParticleSystem
         bool useFlowRegion; //use optical flow region to get motion velocity?
         bool useContourArea; //use contour area to interact w particles?
         bool useContourVel; //use contour velocity to interact w particles?
+    
+        float contourRadius;
     
     protected:
         //helper functions

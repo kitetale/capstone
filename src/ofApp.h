@@ -118,5 +118,6 @@ class ofApp : public ofBaseApp{
     ofxCvColorImage colorImage;
     
     bool drawContour;
+    bool drawFluid;
     bool resetParticle;
 };

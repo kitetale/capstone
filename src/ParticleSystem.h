@@ -22,7 +22,7 @@ class ParticleSystem
         ~ParticleSystem();
 
         void setup(ParticleMode particleMode, int width, int height);
-        void update(float dt, Contour& contour, Fluid& fluid, vector<ofPolyline> c);
+        void update(float dt, Contour& contour, Fluid& fluid);
         void draw();
         void setup(float w, float h, ofPoint initPos, float maxForce, float maxSpeed);
         void update(vector<ofPolyline> c);
@@ -42,6 +42,12 @@ class ParticleSystem
     
     ofPoint initPos;
     float maxForce;
+    
+    ofColor colRed;
+    ofColor colBlue;
+    ofColor colNavy;
+    ofColor colOrange;
+    ofColor colBeige;
     
         
         bool isActive;          // is Particle System active

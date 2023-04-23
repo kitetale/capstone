@@ -22,9 +22,9 @@ Contour::Contour(){
     elapsedFadeTime = 0.0;
     fadeTime = 1.2;
     
-    red = 255.0;
-    green = 255.0;
-    blue = 255.0;
+    red = 0.0;
+    green = 0.0;
+    blue = 0.0;
     
     opacity = 0.0; //current opacity of particles
     maxOpacity = 255.0; //max opacity value

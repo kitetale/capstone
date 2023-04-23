@@ -10,6 +10,8 @@
 #include "ofMain.h"
 #include <stdio.h>
 
+enum Shape {DONUT, PIZZA, BUBBLE, SQUARE, TRIANGLE};
+
 class Particle {
     public:
         Particle();
@@ -54,6 +56,8 @@ class Particle {
         void kill();
         
         float opacity;
+    
+        Shape stype;
         
         ofPoint pos;
         ofPoint prevPos;
@@ -73,11 +77,16 @@ class Particle {
         float initRadius;
         float radius;
         float initColor;
+        float maxLifetime;
         
         
         bool immortal; // can this particle die?
         bool isAlive; // is this particle alive?
         bool isTouched; // is this particle touched (have applied force)
+        bool isFadeIn;
+        bool startFadeIn;
+        float elapsedFadeTime;
+        float maxOpacity;
         
         bool sizeAge; // particle changes size with age?
         bool opacityAge; //particle changes opacity with age?

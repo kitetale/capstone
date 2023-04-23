@@ -24,14 +24,19 @@ ParticleSystem::ParticleSystem(){
     
     immortal = false;
     velocity = 0.0;
-    radius = 3.0;
+    radius = 2.0;
     lifetime = 5.0;
-    // light purple pink (#FABEFF)
-    red = 250.0;
-    green = 190.0;
-    blue = 255.0;
+    // first main color: red
+    red = 255.0;
+    green = 72.0;
+    blue = 82.0;
+    colRed = ofColor(255.0,72.0,82.0,1);
+    colBlue = ofColor(64.0,88.0,188.0,1);
+    colNavy = ofColor(17.0,46.0,78.0,1);
+    colOrange = ofColor(255.0,163.0,0.0,1);
+    colBeige = ofColor(255.0,72.0,82.0,1);
     
-    nParticles = 300;
+    nParticles = 200;
     bornRate = 5.0;
     
     // Emitter
@@ -48,10 +53,10 @@ ParticleSystem::ParticleSystem(){
     lowThresh = 0.1333;
     highThresh = 0.6867;
     separationStrength = 0.01f;
-    attractionStrength = 0.004f;
+    attractionStrength = 0.002f;
     alignmentStrength = 0.01f;
     maxSpeed = 80.0;
-    flockingRadius = 60.0;
+    flockingRadius = 200.0;
     
     // Graphic output
     sizeAge = false;
@@ -63,7 +68,7 @@ ParticleSystem::ParticleSystem(){
     drawStroke = false;
     strokeWidth = 1.2;
     drawConnections = true;
-    connectDist = 30.0;
+    connectDist = 20.0;
     connectWidth = 1.0;
     
     //Physics
@@ -92,8 +97,8 @@ ParticleSystem::ParticleSystem(){
     returnToOrigin = true;
     
     //Input
-    interactionForce = 80.0;
-    interactionRadius = 20.0;
+    interactionForce = 10.0; // HOW STRONG 80
+    interactionRadius = 40.0; // HOW CLOSE 20
     
     //Emitter
     emitInMovement = false;
@@ -160,11 +165,13 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         opacityAge = true;
         flock = true;
         repulse = true;
-        repulseDist = 20.0*radius;
+        repulseDist = 50.0*radius;
         bounceDamping = false;
-        wrapAround = false;
+        wrapAround = true;
         immortal = false;
         addParticles(nParticles);
+        radiusRnd = 7.0;
+        lifetimeRnd = 20;
     } else if(particleMode == ANIMATIONS){
         immortal = false;
         friction = 0.0;
@@ -245,7 +252,7 @@ void ParticleSystem::draw(){
 }
 */
 
-void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid, vector<ofPolyline> c){
+void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
     // if is active or we are fading out, update particles
    if(isActive || isFadingOut){
         if (!activeStarted && !isFadingOut){
@@ -259,8 +266,8 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid, vector<ofP
             bornParticles();
         }
 
-        if(isFadingIn) fadeIn(dt);
-        else if(isFadingOut && !isActive) fadeOut(dt);
+        //if(isFadingIn) fadeIn(dt);
+        if(isFadingOut && !isActive) fadeOut(dt);
         else opacity = maxOpacity; // not fading 
 
         //sort particles for more effective particle/particle interactions
@@ -405,7 +412,7 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid, vector<ofP
             if(gravityInteraction) particles[i]->bounces = true;
             
             // BOID FOLLOW PATH
-           particles[i]->follow(c,contourRadius);
+            particles[i]->follow(contour.contours,contourRadius);
            //particles[i]->update(dt);
             
 
@@ -506,10 +513,22 @@ void ParticleSystem::addParticles(int n){
             vel.y = -velocity-randomRange(velocityRnd, velocity); // make particles all be going up when born
         }
 
-        float initRadius = radius + randomRange(radiusRnd, radius);
-        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
+        float initRadius = radius + ofRandom(1,radiusRnd);
+        float lifetime = this->lifetime + ofRandom(1,lifetimeRnd);
 
-        addParticle(pos, vel, ofColor(red, green, blue), initRadius, lifetime);
+        ofColor col;
+        int rand = (int)ofRandom(1,10);
+        if (rand <= 2){
+            col = colBlue;
+        } else if (rand <= 4){
+            col = colOrange;
+        } else if (rand <= 7){
+            col = colNavy;
+        } else{
+            col = colRed;
+        }
+        
+        addParticle(pos, vel, col, initRadius, lifetime);
     }
 }
 

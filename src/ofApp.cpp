@@ -43,7 +43,11 @@ void ofApp::setup(){
     ofSetFrameRate(60);
     
     time0 = ofGetElapsedTimef(); // init time
-    red = 70; green = 70; blue = 70; // BACKGROUND COLOR
+    // beige (#FFF9EF)backgorund
+    red = 255.0;
+    green = 249.0;
+    blue = 233.0;
+    
     bgGradient = false;
     
     // ALLOCATE IMAGES
@@ -222,7 +226,7 @@ void ofApp::update(){
     animationsParticles->update(dt, contour, fluid);
     fallParticles->update(dt, contour, fluid);
      */
-    particleSystems[currentParticleSystem]->update(dt,contour,fluid,contour.contours);
+    particleSystems[currentParticleSystem]->update(dt,contour,fluid);
    // particleSystems[2]->update(contour.contours);
     
     if (resetParticle){

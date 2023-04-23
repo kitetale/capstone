@@ -32,9 +32,31 @@ Particle::Particle(){
     damping = 0.6;
     
     age = 0;
-    opacity = 255;
+    opacity = 0;
+    maxOpacity = 255.0;
+    startFadeIn = true;
+    isFadeIn = true;
+    
     w = ofGetWidth();
     h = ofGetHeight();
+}
+
+Shape chooseShape(){
+    //Shape {DONUT, PIZZA, BUBBLE, SQUARE, TRIANGLE};
+    int rand = (int)ofRandom(1,100);
+    if (rand<=10){
+        return SQUARE;
+    }
+    if (rand<=30){
+        return TRIANGLE;
+    }
+    if (rand<=60){
+        return DONUT;
+    }
+    if (rand<=80){
+        return PIZZA;
+    }
+    return BUBBLE;
 }
 
 void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float radius, float lifetime){
@@ -44,16 +66,24 @@ void Particle::setup(float id, ofPoint pos, ofPoint vel, ofColor color, float ra
     this->color = color;
     this->initRadius = radius;
     this->lifetime = lifetime;
+    this->maxLifetime = lifetime;
     
     this->radius = radius;
     this->mass = radius * radius * 0.005f;
     this->prevPos = pos;
     this->initPos = pos;
     this->initColor = color.getHue();
+    
+    this->stype = chooseShape();
 }
 
 void Particle::update(float dt){
     if(isAlive){
+        //if opacity decreases over time
+        if(age <= 1) opacity = ofMap(age, 0, 1, 0, 255);
+        else if (opacityAge) opacity *= (1.0f - (age/lifetime)+(1.2/lifetime));
+     
+        
         accel = force/mass; // F=ma
         vel += accel * dt; // Euler's method
         vel *= friction; //decay velocity over time
@@ -70,8 +100,6 @@ void Particle::update(float dt){
         //if radius decreases over time
         if (sizeAge) radius = initRadius * (1.0f - (age/lifetime));
         
-        //if opacity decreases over time
-        if (opacityAge) opacity *= (1.0f - (age/lifetime));
         
         // if particle flickers right before death
         if (flickers){
@@ -93,6 +121,8 @@ void Particle::update(float dt){
         
     }
 }
+
+
  
 void Particle::draw(){
     if (isAlive){
@@ -109,7 +139,12 @@ void Particle::draw(){
         if (!drawLine){ // just particle drawing
             int res = ofMap(fabs(radius), 0 ,10, 6, 22, true);
             ofSetCircleResolution(res);
-            ofDrawCircle(pos, radius);
+            // define shape type in particle generation, then draw that shape based on type
+            //Shape {DONUT, PIZZA, BUBBLE, SQUARE, TRIANGLE};
+            ofDrawCircle(pos,radius);
+            
+            
+            
             if(drawStroke){
                 ofPushStyle();
                 ofNoFill();
@@ -208,8 +243,6 @@ void Particle::seek(ofPoint target){
 
 
 //------------------------------------------------------------------------------
-
-
 
 void Particle::addForce(ofPoint newForce){
     force += newForce;

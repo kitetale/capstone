@@ -27,7 +27,7 @@ Particle::Particle(){
     strokeWidth = 1.2;
     
     limitSpeed = false;
-    maxSpeed = 120.0;
+    maxSpeed = 300.0;
     bounceDamping = true;
     damping = 0.6;
     

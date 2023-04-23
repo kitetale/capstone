@@ -45,6 +45,7 @@ ParticleSystem::ParticleSystem(){
     velocityMotion = 50.0;
     lifetimeRnd = 20.0;
     radiusRnd = 50.0;
+    minRadius = 0.5;
     
     // Grid
     gridRes = 10;
@@ -53,10 +54,10 @@ ParticleSystem::ParticleSystem(){
     lowThresh = 0.1333;
     highThresh = 0.6867;
     separationStrength = 0.01f;
-    attractionStrength = 0.002f;
+    attractionStrength = 0.01f;
     alignmentStrength = 0.01f;
-    maxSpeed = 80.0;
-    flockingRadius = 200.0;
+    maxSpeed = 400.0;
+    flockingRadius = 5.0;
     
     // Graphic output
     sizeAge = false;
@@ -97,8 +98,8 @@ ParticleSystem::ParticleSystem(){
     returnToOrigin = true;
     
     //Input
-    interactionForce = 10.0; // HOW STRONG 80
-    interactionRadius = 40.0; // HOW CLOSE 20
+    interactionForce = 30.0; // HOW STRONG 80
+    interactionRadius = 30.0; // HOW CLOSE 20
     
     //Emitter
     emitInMovement = false;
@@ -167,10 +168,9 @@ void ParticleSystem::setup(ParticleMode particleMode, int width , int height){
         repulse = true;
         repulseDist = 50.0*radius;
         bounceDamping = false;
-        wrapAround = true;
         immortal = false;
         addParticles(nParticles);
-        radiusRnd = 7.0;
+        radiusRnd = 8.0;
         lifetimeRnd = 20;
     } else if(particleMode == ANIMATIONS){
         immortal = false;
@@ -287,6 +287,11 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
                 i++;
             }
         }
+       if (particleMode == BOIDS){ // fill in missing particles
+           int missing = this->nParticles - particles.size();
+           addParticles(missing);
+           
+       }
 
         // 2. calculate behavior of particle
         for (int i=0; i < particles.size(); i++){
@@ -367,7 +372,7 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
                     for(unsigned int i = 0; i < contour.vMaskContours.size(); i++){
                         // born more particles if bigger area
                         float bornNum = bornRate * abs(contour.vMaskContours[i].getArea())/1500.0;
-                        addParticles(bornNum, contour.vMaskContours[i], contour);
+                        addParticles(bornNum, contour.vMaskContours[i], contour); //TODO:
                     }
                 }
                 else{
@@ -474,13 +479,13 @@ void ParticleSystem::addParticle(ofPoint pos, ofPoint vel, ofColor color, float 
 
     newParticle->w = w;
     newParticle->h = h;
-
-    if (particleMode == GRID || particleMode == BOIDS || particleMode == FALL){
+    if (particleMode == BOIDS){
+        newParticle->limitSpeed = true;
+    }
+    if (particleMode == GRID || particleMode == FALL){
         newParticle->immortal = true;
 
-        if (particleMode == BOIDS){
-            newParticle->limitSpeed = true;
-        }
+       
     } else if (particleMode == ANIMATIONS){
         if(animation == SNOW) {
             newParticle->damping = 0.05;
@@ -513,7 +518,7 @@ void ParticleSystem::addParticles(int n){
             vel.y = -velocity-randomRange(velocityRnd, velocity); // make particles all be going up when born
         }
 
-        float initRadius = radius + ofRandom(1,radiusRnd);
+        float initRadius = radius + ofRandom(minRadius,radiusRnd);
         float lifetime = this->lifetime + ofRandom(1,lifetimeRnd);
 
         ofColor col;
@@ -535,13 +540,14 @@ void ParticleSystem::addParticles(int n){
 void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flow){
     for(int i = 0; i < n; i++){
         ofPoint pos, randomVel, motionVel, vel;
-
+        /*
         // Create random particles inside contour polyline
         if(emitAllTimeInside || emitInMovement){
             ofRectangle box = contour.getBoundingBox(); // so it is easier that the particles are born inside contour
             ofPoint center = box.getCenter();
             pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
             pos.y = center.y + (ofRandom(1.0f) - 0.5f) * box.getHeight();
+
 
             while(!contour.inside(pos)){
                 pos.x = center.x + (ofRandom(1.0f) - 0.5f) * box.getWidth();
@@ -557,19 +563,34 @@ void ParticleSystem::addParticles(int n, const ofPolyline& contour, Contour& flo
             // Use normal vector in surface as vel. direction so particle moves out of the contour
             randomVel = -contour.getNormalAtIndexInterpolated(indexInterpolated)*(velocity+randomRange(velocityRnd, velocity));
         }
-
-        // get velocity vector in particle pos
+         */
+        pos = ofPoint(ofRandom(w), ofRandom(h));
+        vel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+        //randomVel = randomVector()*(velocity+randomRange(velocityRnd, velocity));
+        
+       /* // get velocity vector in particle pos
         motionVel = flow.getFlowOffset(pos)*(velocity*5.0+randomRange(velocityRnd, velocity*5.0));
         if(useContourVel){ // slower and poorer result
             motionVel = flow.getVelocityInPoint(pos)*(velocity*5.0+randomRange(velocityRnd, velocity*5.0));
+        }*/
+        //vel = randomVel*(velocityRnd/100.0) + motionVel*(velocityMotion/100.0);
+        //pos += randomVector()*emitterSize; // randomize position within a range of emitter size
+        float initRadius = radius + ofRandom(minRadius,radiusRnd);
+        float lifetime = this->lifetime + ofRandom(1,lifetimeRnd);
+        
+        ofColor col;
+        int rand = (int)ofRandom(1,10);
+        if (rand <= 2){
+            col = colBlue;
+        } else if (rand <= 4){
+            col = colOrange;
+        } else if (rand <= 7){
+            col = colNavy;
+        } else{
+            col = colRed;
         }
-        vel = randomVel*(velocityRnd/100.0) + motionVel*(velocityMotion/100.0);
-        pos += randomVector()*emitterSize; // randomize position within a range of emitter size
 
-        float initRadius = radius + randomRange(radiusRnd, radius);
-        float lifetime = this->lifetime + randomRange(lifetimeRnd, this->lifetime);
-
-        addParticle(pos, vel, ofColor(red, green, blue), initRadius, lifetime);
+        addParticle(pos, vel, col, initRadius, lifetime);
     }
 }
 

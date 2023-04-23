@@ -53,7 +53,7 @@ Contour::Contour(){
     vMaskRandomColor = false;
     
     //contour settings
-    smoothingSize = 0.0;
+    smoothingSize = 3.0;
     lineWidth = 1.5;
     scaleContour = 1.0;
     
@@ -215,6 +215,7 @@ void Contour::update(float dt, ofImage &depthImage){
         ofPolyline contour;
         contour = contourFinder.getPolyline(i);
         contour = contour.getSmoothed(smoothingSize, 0.5);
+        contour.close();
         contours[i] = contour;
     }
     
@@ -250,13 +251,13 @@ void Contour::update(float dt, ofImage &depthImage){
 
 void Contour::draw(){
     if(isActive || isFadingOut){
-        ofPushMatrix();
+        /*ofPushMatrix();
         ofTranslate(w/2.0, h/2.0);
         ofScale(scaleContour, scaleContour);
         
         ofPushMatrix();
         ofTranslate(-w/2.0, -h/2.0);
-        
+        */
         if(drawBoundingRect||drawBoundingRectLine){
             ofPushStyle();
             ofFill();
@@ -330,8 +331,8 @@ void Contour::draw(){
             ofPopStyle();
         }
         
-        ofPopMatrix();
-        ofPopMatrix();
+       /* ofPopMatrix();
+        ofPopMatrix();*/
     }
     
     // DEBUGGING DRAWINGS

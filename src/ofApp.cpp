@@ -33,10 +33,10 @@ void ofApp::setup(){
     minContourSize = 20.0;
     maxContourSize = 250.0;
     irThreshold = 70;
-    //kinect.setLed(ofxKinect::LED_OFF);
+    kinect.setLed(ofxKinect::LED_OFF);
     int w = kinect.width;
     int h = kinect.height;
-    sscale = 1;
+    sscale = 4;
     
     colorImage.allocate(w,h);
     
@@ -148,6 +148,7 @@ void ofApp::update(){
     
     windowWidth = ofGetWindowWidth();
     windowHeight = ofGetWindowHeight();
+     
     // Compute rescale value to scale kinect image
     sscale = (float)windowHeight / (float)kinect.height;
     
@@ -270,8 +271,8 @@ void ofApp::draw(){
     }
     else ofBackground(centerBg);
     
-    ofRectangle canvasRect(0, 0, windowWidth, windowHeight);
-    ofRectangle kinectRect(0, 0, kinect.getWidth(), kinect.getHeight());
+    ofRectangle canvasRect(0, 0, windowWidth,windowHeight);
+    ofRectangle kinectRect(0, 0, kinect.getWidth(),kinect.getHeight());
     kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
     ofTranslate(kinectRect.x, kinectRect.y);
     ofScale(sscale, sscale);
@@ -304,10 +305,14 @@ void ofApp::draw(){
         fbo.draw(0,0);
     }else{
         // Draw Graphics
+        ofPushMatrix();
+        ofTranslate(-50, -35); //TODO: Installation change dimension
+        ofScale(1.1,1.1);
         if(drawContour) {contour.draw();}
 
         if(drawFluid) {fluid.draw();}
         else {particleSystems[currentParticleSystem]->draw();}
+        ofPopMatrix();
 /*
         emitterParticles->draw();
         gridParticles->draw();

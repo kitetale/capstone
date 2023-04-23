@@ -320,6 +320,17 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
                     }
 
                     float closestPointDistance = closestPointInContour.distance(particles[i]->pos);
+                    
+                    // change maxSpeed
+                    float areaDist = 20.0;
+                    if (closestPointDistance>=areaDist){
+                        particles[i]->maxSpeed = 500;
+                        maxSpeed = 500;
+                    } else {
+                        particles[i]->maxSpeed = ofMap(closestPointDistance, 0, areaDist, 60, 300);
+                        maxSpeed = ofMap(closestPointDistance, 0, areaDist, 60, 300);
+                    }
+                    //float backToOrigin = particles[i]->pos.distance(particles[i]->initPos);
                     if((closestPointDistance <= influenceRadius) && (closestPointInContour != ofPoint(-1, -1))){
                         if(repulseInteraction){ // it is an attractForce but result is more logical saying repulse
                             particles[i]->addAttractionForce(closestPointInContour, interactionRadiusSq, interactionForce);
@@ -336,9 +347,12 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
 
                     } else if(gravityInteraction && particles[i]->isTouched){
                         particles[i]->addForce(ofPoint(0.0, 500.0)*particles[i]->mass);
-                    } else if (closestPointDistance > influenceRadius){
-                        particles[i]->seek(particles[i]->initPos, interactionRadiusSq, interactionForce*50.0);//TODO: check scale 50x
                     }
+                    // Do nothing if
+                    // (closestPointInContour == ofPoint(-1, -1)
+                    // (particles[i]->pos.distance(particles[i]->initPos)) < some radius
+                    // closestPointDistance > influenceRadius)
+                    
                 } // if contour input
                 if(fluidInteraction){
                     ofPoint frc = fluid.getFluidOffset(particles[i]->pos);

@@ -43,6 +43,7 @@ class ParticleSystem
     ofPoint initPos;
     float maxForce;
     float minRadius;
+    float influenceRadius;
     
     ofColor colRed;
     ofColor colBlue;

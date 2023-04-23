@@ -56,8 +56,9 @@ ParticleSystem::ParticleSystem(){
     separationStrength = 0.01f;
     attractionStrength = 0.01f;
     alignmentStrength = 0.01f;
-    maxSpeed = 400.0;
+    maxSpeed = 300.0;
     flockingRadius = 5.0;
+    influenceRadius = 100.0; //particles within this radius will be affected for flocking, else go back to init pos
     
     // Graphic output
     sizeAge = false;
@@ -290,7 +291,6 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
        if (particleMode == BOIDS){ // fill in missing particles
            int missing = this->nParticles - particles.size();
            addParticles(missing);
-           
        }
 
         // 2. calculate behavior of particle
@@ -319,7 +319,8 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
                         }
                     }
 
-                    if(closestPointInContour != ofPoint(-1, -1)){
+                    float closestPointDistance = closestPointInContour.distance(particles[i]->pos);
+                    if((closestPointDistance <= influenceRadius) && (closestPointInContour != ofPoint(-1, -1))){
                         if(repulseInteraction){ // it is an attractForce but result is more logical saying repulse
                             particles[i]->addAttractionForce(closestPointInContour, interactionRadiusSq, interactionForce);
                         } else if(attractInteraction){
@@ -335,6 +336,8 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
 
                     } else if(gravityInteraction && particles[i]->isTouched){
                         particles[i]->addForce(ofPoint(0.0, 500.0)*particles[i]->mass);
+                    } else if (closestPointDistance > influenceRadius){
+                        particles[i]->seek(particles[i]->initPos, interactionRadiusSq, interactionForce*50.0);//TODO: check scale 50x
                     }
                 } // if contour input
                 if(fluidInteraction){

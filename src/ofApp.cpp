@@ -89,35 +89,9 @@ void ofApp::setup(){
     fluid.setup(w, h, scaleFactor);
 
     // Particle Init ---------------------------------------------------
-    // MARKER PARTICLES
-    emitterParticles = new ParticleSystem();
-    emitterParticles->setup(EMITTER, w, h);
-
-    // GRID PARTICLES
-    gridParticles = new ParticleSystem();
-    gridParticles->setup(GRID, w, h);
-
     // BOIDS PARTICLES
     boidsParticles = new ParticleSystem();
     boidsParticles->setup(BOIDS, w, h);
-
-    // ANIMATIONS PARTICLES
-    animationsParticles = new ParticleSystem();
-    animationsParticles->animation = RAIN;
-    animationsParticles->setup(ANIMATIONS, w, h);
-    
-    // Crystal Fall PARTICLES
-    fallParticles = new ParticleSystem();
-    fallParticles->setup(FALL, w, h);
-    
-    // VECTOR OF PARTICLE SYSTEMS
-    particleSystems.push_back(emitterParticles);
-    particleSystems.push_back(gridParticles);
-    particleSystems.push_back(boidsParticles);
-    particleSystems.push_back(animationsParticles);
-    particleSystems.push_back(fallParticles);
-    currentParticleSystem = 2;
-    
 
     // Transition ------------------------------------------------------
     // ALLOCATE FBO AND FILL WITH BG COLOR
@@ -131,7 +105,6 @@ void ofApp::setup(){
     
     drawContour = false;
     drawFluid = false;
-    resetParticle = false;
 }
 
 void ofApp::exit() {
@@ -151,8 +124,6 @@ void ofApp::update(){
      
     // Compute rescale value to scale kinect image
     sscale = (float)windowHeight / (float)kinect.height;
-    
-    //if(interpolatingWidgets) //interpolate values for smooth transition
     
     // update kinect
     kinect.update();
@@ -220,33 +191,7 @@ void ofApp::update(){
     fluid.update(dt, contour);
 
     // Update particles
-    /*
-    emitterParticles->update(dt, contour, fluid);
-    gridParticles->update(dt, contour, fluid);
-    boidsParticles->update(dt, contour, fluid);
-    animationsParticles->update(dt, contour, fluid);
-    fallParticles->update(dt, contour, fluid);
-     */
-    particleSystems[currentParticleSystem]->update(dt,contour,fluid);
-   // particleSystems[2]->update(contour.contours);
-    
-    if (resetParticle){
-     //   particleSystems[1] = new ParticleSystem();
-     //   particleSystems[1]->setup(GRID, kinect.width, kinect.height);
-        
-        particleSystems[2] = new ParticleSystem();
-        particleSystems[2]->setup(BOIDS, kinect.width, kinect.height);
-        
-     /*   particleSystems[3] = new ParticleSystem();
-        particleSystems[3]->animation = RAIN;
-        particleSystems[3]->setup(ANIMATIONS, kinect.width, kinect.height);
-        
-        particleSystems[4] = new ParticleSystem();
-        particleSystems[4]->setup(FALL, kinect.width, kinect.height);
-        */
-        resetParticle = false;
-    }
- 
+    boidsParticles->update(dt,contour,fluid);
 }
 
 //--------------------------------------------------------------
@@ -277,56 +222,24 @@ void ofApp::draw(){
     ofTranslate(kinectRect.x, kinectRect.y);
     ofScale(sscale, sscale);
     
-    if(useFBO){
-        fbo.clear();
-        fbo.begin();
-        
-        // Draw semi-transparent white rectangle to slightly clear buffer (depends on the history value)
-        ofFill();
-        ofSetColor(red, green, blue, ofMap(fadeAmount, 0, 100, 250, 0));
-        ofDrawRectangle(0, 0, kinect.width, kinect.height);
+    // Draw Graphics
+    ofPushMatrix();
+    ofTranslate(-50, -35); //TODO: Installation change dimension
+    ofScale(1.1,1.1);
+    if(drawContour) {contour.draw();}
 
-        // Graphics
-        ofNoFill();
-        ofSetColor(0xffffff);
-
-        contour.draw();
-/*
-        emitterParticles->draw();
-        gridParticles->draw();
-        boidsParticles->draw();
-        animationsParticles->draw();
-*/
-        particleSystems[currentParticleSystem]->draw();
-        fbo.end();
-
-        // Draw buffer (graphics) on the screen
-        ofSetColor(255);
-        fbo.draw(0,0);
-    }else{
-        // Draw Graphics
-        ofPushMatrix();
-        ofTranslate(-50, -35); //TODO: Installation change dimension
-        ofScale(1.1,1.1);
-        if(drawContour) {contour.draw();}
-
-        if(drawFluid) {fluid.draw();}
-        else {particleSystems[currentParticleSystem]->draw();}
-        ofPopMatrix();
-/*
-        emitterParticles->draw();
-        gridParticles->draw();
-        boidsParticles->draw();
-        animationsParticles->draw();
- */
-        
-  
-    }
-    
-    ofPopStyle();
+    if(drawFluid) {fluid.draw();}
+    else {boidsParticles->draw();}
     ofPopMatrix();
     
-//    colorImage.draw(0,0,windowWidth, windowHeight);
+    float gapW = 100; //TODO: Installation change side bars
+    ofPushStyle();
+    ofSetColor(255);
+    ofFill();
+    ofDrawRectangle(0, 0, gapW, windowHeight);
+    ofDrawRectangle(windowWidth-gapW, 0, gapW, windowHeight);
+    ofPopStyle();
+    
 }
 
 //--------------------------------------------------------------
@@ -353,35 +266,12 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     switch (key){
-        case '0':
-            currentParticleSystem = 0; //emitter
-            break;
-        case '1':
-            currentParticleSystem = 1;//grid
-            break;
-        case '2':
-            currentParticleSystem = 2; //boid
-            break;
-        case '3':
-            currentParticleSystem = 3; // animation
-            animationsParticles->animation = SNOW;
-            break;
-        case '4':
-            currentParticleSystem = 4; //fall
-            break;
         case 'c':
-            for (int i=0; i<particleSystems.size(); ++i){
-                particleSystems[i]->drawConnections = !particleSystems[i]->drawConnections;
-            }
+            boidsParticles->drawConnections = !boidsParticles->drawConnections;
             break;
         case 'd':
             drawContour = !drawContour;
             break;
-        case 'r':
-            resetParticle = true;
-            break;
-        case 'f':
-            drawFluid = !drawFluid;
         default:
             break;
     }

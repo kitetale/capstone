@@ -94,13 +94,7 @@ class ofApp : public ofBaseApp{
     Fluid fluid;
  
     // ------------------------ PARTICLE SYSTEM --------------------------
-    ParticleSystem *emitterParticles;
-    ParticleSystem *gridParticles;
     ParticleSystem *boidsParticles;
-    ParticleSystem *animationsParticles;
-    ParticleSystem *fallParticles;
-    vector<ParticleSystem *> particleSystems;
-    int currentParticleSystem;
   
     // ---------------------------- SOUND --------------------------------
     // ofSoundPlayer ambientSound; // if want to play ambient noise
@@ -119,5 +113,4 @@ class ofApp : public ofBaseApp{
     
     bool drawContour;
     bool drawFluid;
-    bool resetParticle;
 };

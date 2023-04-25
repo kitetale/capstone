@@ -278,21 +278,35 @@ void ofApp::draw(){
     }
     else ofBackground(centerBg);
     
-    ofRectangle canvasRect(0, 0, windowWidth,windowHeight);
+    ofRectangle canvasRect(0, 0, ofGetWindowWidth(),ofGetWindowHeight());
     ofRectangle kinectRect(0, 0, kinect.getWidth(),kinect.getHeight());
-    kinectRect.scaleTo(canvasRect, OF_SCALEMODE_FIT);
-    ofTranslate(kinectRect.x, kinectRect.y);
+    kinectRect.scaleTo(canvasRect, OF_ASPECT_RATIO_KEEP_BY_EXPANDING, OF_ALIGN_HORZ_CENTER);
+    //ofTranslate(kinectRect.x, kinectRect.y);
     ofScale(sscale, sscale);
     
     // Draw Graphics
     ofPushMatrix();
-    ofTranslate(-50, -35); //TODO: Installation change dimension
-    ofScale(1.1,1.1);
+    ofTranslate(-15, -70); //TODO: Installation change dimension
+    ofScale(1.15,1.15);
     if(drawContour) {contour.draw();}
 
     if(drawFluid) {fluid.draw();}
     else {boidsParticles->draw();}
     ofPopMatrix();
+    
+    if(drawContour){
+        ofPushStyle();
+        ofSetColor(0);
+        stringstream reportStream;
+        reportStream << "set near clipping " << nearClipping << " (press: k l)" << endl
+            << "set far clipping " << farClipping << " (press: < >)" << endl
+            << "set near thresh " << nearThreshold << " (press: h j)" << endl
+            << "set far thresh " << farThreshold << " (press: n m)" << endl
+            << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl;
+            
+            ofDrawBitmapString(reportStream.str(), 20, 100);
+        ofPopStyle();
+    }
     /*
     float gapW = 0; //TODO: Installation change side bars
     ofPushStyle();
@@ -321,6 +335,32 @@ void ofApp::keyPressed(int key){
             }
             kinect.setCameraTiltAngle(angle);
             break;
+        case 'k':
+            nearClipping-=10;
+            break;
+        case 'l':
+            nearClipping+=10;
+            break;
+        case ',':
+        case '<':
+            farClipping-=10;
+            break;
+        case '.':
+        case '>':
+            farClipping+=10;
+            break;
+        case 'h':
+            nearThreshold-=5;
+            break;
+        case 'j':
+            nearThreshold+=5;
+            break;
+        case 'n':
+            farThreshold-=5;
+            break;
+        case 'm':
+            farThreshold+=5;
+            break;
         default:
             break;
     }
@@ -334,6 +374,14 @@ void ofApp::keyReleased(int key){
             break;
         case 'd':
             drawContour = !drawContour;
+            break;
+        case 'k':
+        case 'l':
+        case ',':
+        case '.':
+        case '<':
+        case '>':
+            kinect.setDepthClipping(nearClipping,farClipping);
             break;
         default:
             break;

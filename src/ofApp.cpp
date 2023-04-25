@@ -105,6 +105,35 @@ void ofApp::setup(){
     
     drawContour = false;
     drawFluid = false;
+    
+    ambientSound.load("equipoise_sound.mp3");
+    s_c.load("do.mp3");
+    xylophone.push_back(s_c);
+    s_d.load("re.mp3");
+    xylophone.push_back(s_d);
+    s_e.load("mi.mp3");
+    xylophone.push_back(s_e);
+    s_g.load("sol.mp3");
+    xylophone.push_back(s_g);
+    s_a.load("la.mp3");
+    xylophone.push_back(s_a);
+    s_c2.load("do1.mp3");
+    xylophone.push_back(s_c2);
+    //s_d2.load("re2.mp3");
+    //xylophone.push_back(s_d2);
+    //s_e2.load("mi2.mp3");
+    //xylophone.push_back(s_e2);
+    //s_g2.load("sol2.mp3");
+    //xylophone.push_back(s_g2);
+    s_g0.load("sol0.mp3");
+    xylophone.push_back(s_g0);
+    s_f0.load("fa0.mp3");
+    xylophone.push_back(s_f0);
+    
+    curNote = 0;
+    donePlaying = true;
+    lastNum = 0;
+    
 }
 
 void ofApp::exit() {
@@ -114,6 +143,40 @@ void ofApp::exit() {
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    if(!ambientSound.isPlaying()) ambientSound.play();
+    
+    int newNum = contour.boundingRects.size();
+    if (lastNum > newNum && donePlaying){
+        int noteNum = xylophone.size();
+        int i1 = ofRandom(noteNum);
+        int i2 = ofRandom(noteNum);
+        int i3 = ofRandom(noteNum);
+        if (i1==i2) i2 = ofRandom(noteNum);
+        if (i2==i3) i3 = ofRandom(noteNum);
+        if (i1==i3) i3 = ofRandom(noteNum);
+        notei[0] = i1;
+        notei[1] = i2;
+        notei[2] = i3;
+        sort(notei, notei+3);
+        
+        donePlaying = false;
+    }
+    if (!donePlaying){
+        if (curNote >= 2){
+            xylophone[notei[2]].play();
+            curNote = 0;
+            donePlaying = true;
+            lastNum = contour.boundingRects.size();
+        } else {
+            xylophone[notei[curNote]].play();
+            curNote++;
+        }
+    } else {
+        lastNum = newNum;
+    }
+    
+    
+    
     // Compute dt
     float time = ofGetElapsedTimef(); // get new time
     float dt = ofClamp(time - time0, 0, 0.1); // calculate time passed
@@ -206,7 +269,6 @@ void ofApp::draw(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     ofPushMatrix();
-    ofPushStyle();
     
     ofColor contourBg(red, green, blue);
     ofColor centerBg(red, green, blue);
@@ -231,14 +293,15 @@ void ofApp::draw(){
     if(drawFluid) {fluid.draw();}
     else {boidsParticles->draw();}
     ofPopMatrix();
-    
-    float gapW = 100; //TODO: Installation change side bars
+    /*
+    float gapW = 0; //TODO: Installation change side bars
     ofPushStyle();
     ofSetColor(255);
     ofFill();
     ofDrawRectangle(0, 0, gapW, windowHeight);
     ofDrawRectangle(windowWidth-gapW, 0, gapW, windowHeight);
     ofPopStyle();
+     */
     
 }
 

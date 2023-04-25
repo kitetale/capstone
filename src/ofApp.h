@@ -89,6 +89,10 @@ class ofApp : public ofBaseApp{
     
    // ----------------------------- CONTOUR -----------------------------
     Contour contour;
+    int lastNum; // last number of blobs detected
+    bool donePlaying; //done playing four notes
+    int curNote;
+    int notei[4] = {};
     
     // ----------------------------- FLUID -------------------------------
     Fluid fluid;
@@ -97,7 +101,9 @@ class ofApp : public ofBaseApp{
     ParticleSystem *boidsParticles;
   
     // ---------------------------- SOUND --------------------------------
-    // ofSoundPlayer ambientSound; // if want to play ambient noise
+    ofSoundPlayer ambientSound;
+    ofSoundPlayer s_c, s_d, s_e, s_g, s_a, s_c2, s_d2,s_e2, s_g2, s_g0, s_f0; // pentatonic xylophone
+    vector<ofSoundPlayer> xylophone;
     
     // -------------------------- TRANSITION -----------------------------
     ofFbo fbo;

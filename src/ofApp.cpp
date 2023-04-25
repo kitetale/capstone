@@ -25,11 +25,13 @@ void ofApp::setup(){
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
     flip = true;
-    nearClipping = 20;
-    farClipping = 4000;
+    angle = 10;
+    kinect.setCameraTiltAngle(angle);
+    nearClipping = 0;
+    farClipping = 5800;
     kinect.setDepthClipping(nearClipping,farClipping);
-    nearThreshold = 255;
-    farThreshold = 165;
+    nearThreshold = 600;
+    farThreshold = 0;
     minContourSize = 20.0;
     maxContourSize = 250.0;
     irThreshold = 70;
@@ -47,16 +49,24 @@ void ofApp::setup(){
     red = 255.0;
     green = 249.0;
     blue = 233.0;
+    // TODO: Play around with bg color to lower contrast (eye comfort)
+    
+    
     
     bgGradient = false;
     
     // ALLOCATE IMAGES
     depthImage.allocate(w, h, OF_IMAGE_GRAYSCALE);
+    bgImage.allocate(w, h); // to subtract background (Wall)
+    grayDiff.allocate(w, h);
+    grayDepthImage.allocate(w,h);
     depthOriginal.allocate(w, h, OF_IMAGE_GRAYSCALE);
     grayThreshNear.allocate(w, h, OF_IMAGE_GRAYSCALE);
     grayThreshFar.allocate(w, h, OF_IMAGE_GRAYSCALE);
     irImage.allocate(w, h, OF_IMAGE_GRAYSCALE);
     irOriginal.allocate(w, h, OF_IMAGE_GRAYSCALE);
+    
+    learnBg = false;
     
     // ALLOCATE CROPPING MASKS
     depthCroppingMask = Mat::ones(h, w, CV_8UC1); // row , col , type
@@ -197,6 +207,14 @@ void ofApp::update(){
         if(flip) depthOriginal.mirror(false, true);
         irOriginal.setFromPixels(kinect.getPixels());
         if(flip) irOriginal.mirror(false, true);
+        
+        if (learnBg) {
+            bgImage.setFromPixels(depthOriginal.getPixels());
+            learnBg = false;
+        }
+        grayDepthImage.setFromPixels(depthOriginal.getPixels());
+        grayDiff.absDiff(bgImage, grayDepthImage);
+        depthOriginal.setFromPixels(grayDiff.getPixels());
     }
     // update imgs
     copy(irOriginal, irImage);
@@ -276,7 +294,10 @@ void ofApp::draw(){
         if(centerBg.getBrightness() > 0) contourBg.setBrightness(ofMap(centerBg.getBrightness(), 0.0, 255.0, 20.0, 130.0));
         ofBackgroundGradient(centerBg, contourBg);
     }
-    else ofBackground(centerBg);
+    else {
+        ofBackground(centerBg);
+        //ofBackground(180);
+    }
     
     ofRectangle canvasRect(0, 0, ofGetWindowWidth(),ofGetWindowHeight());
     ofRectangle kinectRect(0, 0, kinect.getWidth(),kinect.getHeight());
@@ -286,8 +307,8 @@ void ofApp::draw(){
     
     // Draw Graphics
     ofPushMatrix();
-    ofTranslate(-15, -70); //TODO: Installation change dimension
-    ofScale(1.15,1.15);
+    ofTranslate(-25, -85); //TODO: Installation change dimension
+    ofScale(1.42,1.42);
     if(drawContour) {contour.draw();}
 
     if(drawFluid) {fluid.draw();}
@@ -383,6 +404,8 @@ void ofApp::keyReleased(int key){
         case '>':
             kinect.setDepthClipping(nearClipping,farClipping);
             break;
+        case ' ':
+            learnBg = true;
         default:
             break;
     }

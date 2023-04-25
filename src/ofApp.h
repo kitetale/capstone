@@ -71,8 +71,11 @@ class ofApp : public ofBaseApp{
     
     ofImage irImage, irOriginal;
     ofImage depthImage, depthOriginal;
+    ofxCvGrayscaleImage grayDiff, grayDepthImage, bgImage;
     ofImage grayThreshNear;
     ofImage grayThreshFar;
+    
+    bool learnBg;
     
     // for adjusting cam view area
     cv::Mat depthCroppingMask;

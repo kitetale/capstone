@@ -92,7 +92,7 @@ class ofApp : public ofBaseApp{
     
    // ----------------------------- CONTOUR -----------------------------
     Contour contour;
-    int lastNum; // last number of blobs detected
+    unsigned long lastNum; // last number of blobs detected
     bool donePlaying; //done playing four notes
     int curNote;
     int notei[4] = {};
@@ -122,4 +122,13 @@ class ofApp : public ofBaseApp{
     
     bool drawContour;
     bool drawFluid;
+    
+    ftFluidFlow fluidFlow;
+    ftOpticalFlow opticalFlow;
+    ftVelocityBridgeFlow velocityBridgeFlow;
+    ftDensityBridgeFlow densityBridgeFlow;
+    ftTemperatureBridgeFlow temperatureBridgeFlow;
+    int densityWidth, densityHeight, simulationWidth, simulationHeight;
+    
+    bool sand;
 };

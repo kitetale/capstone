@@ -3,8 +3,8 @@
 using namespace ofxCv;
 using namespace cv;
 
-// ref: https://openframeworks.cc/ofBook/chapters/shaders.html
 // ref: Crea by Fabia Serra Arrizabalaga https://github.com/fabiaserra/crea
+// ref: ofFlowTool example
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -104,12 +104,6 @@ void ofApp::setup(){
     boidsParticles->setup(BOIDS, w, h);
 
     // Transition ------------------------------------------------------
-    // ALLOCATE FBO AND FILL WITH BG COLOR
-    fbo.allocate(w, h, GL_RGBA32F_ARB); //GL_RGBA32F_ARB
-    fbo.begin();
-    ofClear(255,255,255,0);
-    fbo.end();
-
     fadeAmount = 80;
     useFBO = false;
     
@@ -144,6 +138,32 @@ void ofApp::setup(){
     donePlaying = true;
     lastNum = 0;
     
+    //============================= FLUID FIELD ==============
+    densityWidth = 1280;
+    densityHeight = 720;
+    // process all but the density on 16th resolution
+    simulationWidth = densityWidth / 2;
+    simulationHeight = densityHeight / 2;
+    
+    opticalFlow.setup(simulationWidth, simulationHeight);
+    velocityBridgeFlow.setup(simulationWidth, simulationHeight);
+    densityBridgeFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
+    temperatureBridgeFlow.setup(simulationWidth, simulationHeight);
+    fluidFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
+    
+    opticalFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
+    velocityBridgeFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
+    densityBridgeFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
+    temperatureBridgeFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
+    fluidFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
+    fluidFlow.setBuoyancyWeight(0.8);
+    fluidFlow.setBuoyancySigma(0.06);
+    fluidFlow.setDissipationDen(0.25); //TODO: alter by installation distance
+    //fluidFlow.setBuoyancyAmbientTemperature(0.2);
+    
+    sand = true;
+    fbo.allocate(densityWidth, densityHeight);
+    ftUtil::zero(fbo); //clear fbo
 }
 
 void ofApp::exit() {
@@ -154,42 +174,43 @@ void ofApp::exit() {
 //--------------------------------------------------------------
 void ofApp::update(){
     if(!ambientSound.isPlaying()) ambientSound.play();
-    
-    int newNum = contour.boundingRects.size();
-    if (lastNum > newNum && donePlaying){
-        int noteNum = xylophone.size();
-        int i1 = ofRandom(noteNum);
-        int i2 = ofRandom(noteNum);
-        int i3 = ofRandom(noteNum);
-        if (i1==i2) i2 = ofRandom(noteNum);
-        if (i2==i3) i3 = ofRandom(noteNum);
-        if (i1==i3) i3 = ofRandom(noteNum);
-        notei[0] = i1;
-        notei[1] = i2;
-        notei[2] = i3;
-        sort(notei, notei+3);
-        
-        donePlaying = false;
-    }
-    if (!donePlaying){
-        if (curNote >= 2){
-            xylophone[notei[2]].play();
-            curNote = 0;
-            donePlaying = true;
-            lastNum = contour.boundingRects.size();
-        } else {
-            xylophone[notei[curNote]].play();
-            curNote++;
+    if (!sand){
+        unsigned long newNum = contour.boundingRects.size();
+        if (lastNum > newNum && donePlaying){
+            unsigned long noteNum = xylophone.size();
+            int i1 = ofRandom(noteNum);
+            int i2 = ofRandom(noteNum);
+            int i3 = ofRandom(noteNum);
+            if (i1==i2) i2 = ofRandom(noteNum);
+            if (i2==i3) i3 = ofRandom(noteNum);
+            if (i1==i3) i3 = ofRandom(noteNum);
+            notei[0] = i1;
+            notei[1] = i2;
+            notei[2] = i3;
+            sort(notei, notei+3);
+            
+            donePlaying = false;
         }
-    } else {
-        lastNum = newNum;
+        if (!donePlaying){
+            if (curNote >= 2){
+                xylophone[notei[2]].play();
+                curNote = 0;
+                donePlaying = true;
+                lastNum = contour.boundingRects.size();
+            } else {
+                xylophone[notei[curNote]].play();
+                curNote++;
+            }
+        } else {
+            lastNum = newNum;
+        }
     }
-    
-    
+    //---------------------------------------------------- ^ SOUND ----
     
     // Compute dt
     float time = ofGetElapsedTimef(); // get new time
-    float dt = ofClamp(time - time0, 0, 0.1); // calculate time passed
+    //float dt = ofClamp(time - time0, 0, 0.1); // calculate time passed
+    float dt = 1.0 / max(ofGetFrameRate(), 1.f);
     time0 = time;
     
     windowWidth = ofGetWindowWidth();
@@ -270,9 +291,34 @@ void ofApp::update(){
     
     // Update fluid
     fluid.update(dt, contour);
-
-    // Update particles
-    boidsParticles->update(dt,contour,fluid);
+    
+    if (sand){
+        if (kinect.isFrameNew()){
+            fbo.begin();
+            kinect.draw(fbo.getWidth(), 0, -fbo.getWidth(), fbo.getHeight());  // draw flipped
+            fbo.end();
+            
+            opticalFlow.setInput(fbo.getTexture());
+        }
+        opticalFlow.update();
+        
+        velocityBridgeFlow.setVelocity(opticalFlow.getVelocity());
+        velocityBridgeFlow.update(dt);
+        densityBridgeFlow.setDensity(fbo.getTexture());
+        densityBridgeFlow.setVelocity(opticalFlow.getVelocity());
+        densityBridgeFlow.update(dt);
+        temperatureBridgeFlow.setDensity(fbo.getTexture());
+        temperatureBridgeFlow.setVelocity(opticalFlow.getVelocity());
+        temperatureBridgeFlow.update(dt);
+        
+        fluidFlow.addVelocity(velocityBridgeFlow.getVelocity());
+        fluidFlow.addDensity(densityBridgeFlow.getDensity());
+        fluidFlow.addTemperature(temperatureBridgeFlow.getTemperature());
+        fluidFlow.update(dt);
+    } else {
+        // Update particles
+        boidsParticles->update(dt,contour,fluid);
+    }
 }
 
 //--------------------------------------------------------------
@@ -286,38 +332,50 @@ void ofApp::draw(){
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    ofPushMatrix();
-    
-    ofColor contourBg(red, green, blue);
-    ofColor centerBg(red, green, blue);
-    if(bgGradient){
-        if(centerBg.getBrightness() > 0) contourBg.setBrightness(ofMap(centerBg.getBrightness(), 0.0, 255.0, 20.0, 130.0));
-        ofBackgroundGradient(centerBg, contourBg);
-    }
-    else {
-        ofBackground(centerBg);
-        //ofBackground(180);
-    }
-    
-    ofRectangle canvasRect(0, 0, ofGetWindowWidth(),ofGetWindowHeight());
-    ofRectangle kinectRect(0, 0, kinect.getWidth(),kinect.getHeight());
-    kinectRect.scaleTo(canvasRect, OF_ASPECT_RATIO_KEEP_BY_EXPANDING, OF_ALIGN_HORZ_CENTER);
-    //ofTranslate(kinectRect.x, kinectRect.y);
-    ofScale(sscale, sscale);
-    
-    // Draw Graphics
-    ofPushMatrix();
-    ofTranslate(-25, -85); //TODO: Installation change dimension
-    ofScale(1.42,1.42);
-    if(drawContour) {contour.draw();}
-
-    if(drawFluid) {fluid.draw();}
-    else {boidsParticles->draw();}
-    ofPopMatrix();
-    
-    if(drawContour){
+    if (sand){
+        ofClear(0);
         ofPushStyle();
-        ofSetColor(0);
+        //ofEnableBlendMode(OF_BLENDMODE_DISABLED);
+        //fbo.draw(0,0,windowWidth,windowHeight);
+        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+        ofSetColor(ofColor(250,110,50, 200));
+        fluidFlow.draw(0, 0, windowWidth, windowHeight);
+        ofPopStyle();
+    } else {
+        ofPushMatrix();
+        
+        ofColor contourBg(red, green, blue);
+        ofColor centerBg(red, green, blue);
+        if(bgGradient){
+            if(centerBg.getBrightness() > 0) contourBg.setBrightness(ofMap(centerBg.getBrightness(), 0.0, 255.0, 20.0, 130.0));
+            ofBackgroundGradient(centerBg, contourBg);
+        }
+        else {
+            ofBackground(centerBg);
+            //ofBackground(180);
+        }
+        
+        ofRectangle canvasRect(0, 0, ofGetWindowWidth(),ofGetWindowHeight());
+        ofRectangle kinectRect(0, 0, kinect.getWidth(),kinect.getHeight());
+        kinectRect.scaleTo(canvasRect, OF_ASPECT_RATIO_KEEP_BY_EXPANDING, OF_ALIGN_HORZ_CENTER);
+        //ofTranslate(kinectRect.x, kinectRect.y);
+        ofScale(sscale, sscale);
+        
+        // Draw Graphics
+        ofPushMatrix();
+        ofTranslate(-25, -85); //TODO: Installation change dimension
+        ofScale(1.42,1.42);
+        if(drawContour) {contour.draw();}
+
+        if(drawFluid) {fluid.draw();}
+        else {boidsParticles->draw();}
+        ofPopMatrix();
+    }
+    
+    if (drawContour){ // DEBUG
+        ofPushStyle();
+        if (sand) ofSetColor(0);
+        else ofSetColor(0);
         stringstream reportStream;
         reportStream << "set near clipping " << nearClipping << " (press: k l)" << endl
             << "set far clipping " << farClipping << " (press: < >)" << endl
@@ -406,6 +464,10 @@ void ofApp::keyReleased(int key){
             break;
         case ' ':
             learnBg = true;
+            break;
+        case 's':
+            sand = !sand;
+            break;
         default:
             break;
     }

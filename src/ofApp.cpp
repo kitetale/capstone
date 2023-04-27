@@ -18,10 +18,10 @@ void ofApp::setup(){
     farClipping = 5800;
     kinect.setDepthClipping(nearClipping,farClipping);
     nearThreshold = 600;
-    farThreshold = 0;
+    farThreshold = 10;
     minContourSize = 20.0;
     maxContourSize = 250.0;
-    irThreshold = 70;
+    irThreshold = 400;
     kinect.setLed(ofxKinect::LED_OFF);
     int w = kinect.width;
     int h = kinect.height;

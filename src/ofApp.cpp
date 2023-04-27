@@ -67,6 +67,12 @@ void ofApp::setup(){
     irOriginal.allocate(w, h, OF_IMAGE_GRAYSCALE);
     
     learnBg = false;
+    //load bg img
+    bgOriginal.load("background.png");
+    bgOriginal.setImageType(OF_IMAGE_GRAYSCALE);
+    ofPixels bgPix = bgOriginal.getPixels();
+    bgImage.setFromPixels(bgPix);
+    
     
     // ALLOCATE CROPPING MASKS
     depthCroppingMask = Mat::ones(h, w, CV_8UC1); // row , col , type
@@ -230,7 +236,10 @@ void ofApp::update(){
         if(flip) irOriginal.mirror(false, true);
         
         if (learnBg) {
-            bgImage.setFromPixels(depthOriginal.getPixels());
+            ofPixels pix = depthOriginal.getPixels();
+            bgImage.setFromPixels(pix);
+            // save bg image for next load
+            ofSaveImage(pix, "background.png");
             learnBg = false;
         }
         grayDepthImage.setFromPixels(depthOriginal.getPixels());
@@ -381,6 +390,7 @@ void ofApp::draw(){
             << "set far clipping " << farClipping << " (press: < >)" << endl
             << "set near thresh " << nearThreshold << " (press: h j)" << endl
             << "set far thresh " << farThreshold << " (press: n m)" << endl
+            << "set IR thresh " << irThreshold << " (press: z x)" <<endl
             << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl;
             
             ofDrawBitmapString(reportStream.str(), 20, 100);
@@ -415,30 +425,36 @@ void ofApp::keyPressed(int key){
             kinect.setCameraTiltAngle(angle);
             break;
         case 'k':
-            nearClipping-=10;
+            if (drawContour) nearClipping-=10;
             break;
         case 'l':
-            nearClipping+=10;
+            if (drawContour) nearClipping+=10;
             break;
         case ',':
         case '<':
-            farClipping-=10;
+            if (drawContour) farClipping-=10;
             break;
         case '.':
         case '>':
-            farClipping+=10;
+            if (drawContour) farClipping+=10;
             break;
         case 'h':
-            nearThreshold-=5;
+            if (drawContour) nearThreshold-=5;
             break;
         case 'j':
-            nearThreshold+=5;
+            if (drawContour) nearThreshold+=5;
             break;
         case 'n':
-            farThreshold-=5;
+            if (drawContour) farThreshold-=5;
             break;
         case 'm':
-            farThreshold+=5;
+            if (drawContour) farThreshold+=5;
+            break;
+        case 'z':
+            if (drawContour) irThreshold-=5;
+            break;
+        case 'x':
+            if (drawContour) irThreshold+=5;
             break;
         default:
             break;
@@ -460,7 +476,7 @@ void ofApp::keyReleased(int key){
         case '.':
         case '<':
         case '>':
-            kinect.setDepthClipping(nearClipping,farClipping);
+            if (drawContour) kinect.setDepthClipping(nearClipping,farClipping);
             break;
         case ' ':
             learnBg = true;

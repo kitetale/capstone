@@ -70,7 +70,7 @@ class ofApp : public ofBaseApp{
     int irBlur; // amount of blur applied to IR img
     
     ofImage irImage, irOriginal;
-    ofImage depthImage, depthOriginal;
+    ofImage depthImage, depthOriginal, bgOriginal;
     ofxCvGrayscaleImage grayDiff, grayDepthImage, bgImage;
     ofImage grayThreshNear;
     ofImage grayThreshFar;

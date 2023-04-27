@@ -170,6 +170,13 @@ void ofApp::setup(){
     sand = true;
     fbo.allocate(densityWidth, densityHeight);
     ftUtil::zero(fbo); //clear fbo
+    
+    startFadeIn = false;
+    startFadeOut = false;
+    isFadingIn = false;
+    isFadingOut = false;
+    elapsedFadeTime = 0.0;
+    opacity = 255.0;
 }
 
 void ofApp::exit() {
@@ -328,6 +335,9 @@ void ofApp::update(){
         // Update particles
         boidsParticles->update(dt,contour,fluid);
     }
+    
+    if(isFadingIn)fadeIn(dt, sand);
+    if(isFadingOut)fadeOut(dt, sand);
 }
 
 //--------------------------------------------------------------
@@ -347,7 +357,7 @@ void ofApp::draw(){
         //ofEnableBlendMode(OF_BLENDMODE_DISABLED);
         //fbo.draw(0,0,windowWidth,windowHeight);
         ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-        ofSetColor(ofColor(250,110,50, 200));
+        ofSetColor(ofColor(200,130,50, opacity2));
         fluidFlow.draw(0, 0, windowWidth, windowHeight);
         ofPopStyle();
     } else {
@@ -377,7 +387,13 @@ void ofApp::draw(){
         if(drawContour) {contour.draw();}
 
         if(drawFluid) {fluid.draw();}
-        else {boidsParticles->draw();}
+        else {
+            ofPushStyle();
+            ofSetColor(255,255,255,opacity);
+            boidsParticles->draw();
+            ofPopStyle();
+            
+        }
         ofPopMatrix();
     }
     
@@ -407,6 +423,46 @@ void ofApp::draw(){
      */
     
 }
+
+
+void ofApp::fadeIn(float dt, bool sand){
+    if(startFadeIn){
+        startFadeIn = false;
+        elapsedFadeTime = 0.0;
+        if (sand) opacity = 0.0;
+        else opacity2 = 0.0;
+    }
+    else{
+        if (sand) opacity = ofMap(elapsedFadeTime, 0.0, 1.2, 0.0, 255.0, true);
+        else opacity2 = ofMap(elapsedFadeTime, 0.0, 1.2, 0.0, 220.0, true);
+        elapsedFadeTime += dt;
+        if(elapsedFadeTime > 1.2){
+            isFadingIn = false;
+            if (sand) opacity = 255.0;
+            else opacity2 = 220.0;
+        }
+    }
+}
+
+void ofApp::fadeOut(float dt, bool sand){
+    if(startFadeOut){
+        startFadeOut = false;
+        elapsedFadeTime = 0.0;
+        if (sand) opacity = 255.0;
+        else opacity2 = 220.0;
+    }
+    else{
+        if (sand) opacity = ofMap(elapsedFadeTime, 0.0, 1.2, 255.0, 0.0, true);
+        else opacity2 = ofMap(elapsedFadeTime, 0.0, 1.2, 220.0, 0.0, true);
+        elapsedFadeTime += dt;
+        if(elapsedFadeTime > 1.2){
+            isFadingOut = false;
+            if (sand) opacity = 0.0;
+            else opacity2 = 0.0;
+        }
+    }
+}
+
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
@@ -483,6 +539,8 @@ void ofApp::keyReleased(int key){
             break;
         case 's':
             sand = !sand;
+            startFadeIn = true;
+            isFadingIn = true;
             break;
         default:
             break;

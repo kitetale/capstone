@@ -258,7 +258,7 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
    if(isActive || isFadingOut){
         if (!activeStarted && !isFadingOut){
             activeStarted = true;
-            isFadingIn = true;
+            //isFadingIn = true;
             isFadingOut = false;
             startFadeIn = true;
             startFadeOut = false;
@@ -267,7 +267,7 @@ void ParticleSystem::update(float dt, Contour& contour, Fluid& fluid){
             bornParticles();
         }
 
-        //if(isFadingIn) fadeIn(dt);
+        if(isFadingIn) fadeIn(dt);
         if(isFadingOut && !isActive) fadeOut(dt);
         else opacity = maxOpacity; // not fading 
 

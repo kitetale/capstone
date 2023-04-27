@@ -28,6 +28,8 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
         void exit();
+        void fadeIn(float dt, bool sand);
+        void fadeOut(float dt, bool sand);
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -131,4 +133,11 @@ class ofApp : public ofBaseApp{
     int densityWidth, densityHeight, simulationWidth, simulationHeight;
     
     bool sand;
+    
+    bool startFadeIn;
+    bool startFadeOut;
+    bool isFadingIn;
+    bool isFadingOut;
+    float elapsedFadeTime;
+    float opacity, opacity2;
 };

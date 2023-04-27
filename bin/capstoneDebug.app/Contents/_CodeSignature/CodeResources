@@ -11,6 +11,15 @@
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>Frameworks/Syphon.framework</key>
+		<dict>
+			<key>cdhash</key>
+			<data>
+			7ehLW4Mn5ySHv/LObqO2upqCK8o=
+			</data>
+			<key>requirement</key>
+			<string>cdhash H"7b74b34d4e6a72529c709b4184d93ad81361269f" or cdhash H"ede84b5b8327e72487bff2ce6ea3b6ba9a822bca" or cdhash H"2226e1e1b02c72a0fc18d0b24333b31a8ff8c34f" or cdhash H"c962b5269c8e4a7173a4935ad8c35b8e46863b62"</string>
+		</dict>
 		<key>Frameworks/libfmod.dylib</key>
 		<dict>
 			<key>cdhash</key>

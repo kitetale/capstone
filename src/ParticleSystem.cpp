@@ -30,11 +30,11 @@ ParticleSystem::ParticleSystem(){
     red = 255.0;
     green = 72.0;
     blue = 82.0;
-    colRed = ofColor(255.0,72.0,82.0,1);
+    colRed = ofColor(250.0,82.0,56.0,1);
     colBlue = ofColor(64.0,88.0,188.0,1);
     colNavy = ofColor(17.0,46.0,78.0,1);
-    colOrange = ofColor(255.0,163.0,0.0,1);
-    colBeige = ofColor(255.0,72.0,82.0,1);
+    colOrange = ofColor(255.0,205.0,17.0,1);
+    colBeige = ofColor(255.0,251.0,214.0,1);
     
     nParticles = 200;
     bornRate = 5.0;

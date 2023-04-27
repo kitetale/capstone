@@ -28,8 +28,6 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
         void exit();
-        void fadeIn(float dt, bool sand);
-        void fadeOut(float dt, bool sand);
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -124,20 +122,4 @@ class ofApp : public ofBaseApp{
     
     bool drawContour;
     bool drawFluid;
-    
-    ftFluidFlow fluidFlow;
-    ftOpticalFlow opticalFlow;
-    ftVelocityBridgeFlow velocityBridgeFlow;
-    ftDensityBridgeFlow densityBridgeFlow;
-    ftTemperatureBridgeFlow temperatureBridgeFlow;
-    int densityWidth, densityHeight, simulationWidth, simulationHeight;
-    
-    bool sand;
-    
-    bool startFadeIn;
-    bool startFadeOut;
-    bool isFadingIn;
-    bool isFadingOut;
-    float elapsedFadeTime;
-    float opacity, opacity2;
 };

@@ -8,19 +8,6 @@ using namespace cv;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    /*
-    #ifdef TARGET_OPENGLES
-        shader.load("shadersES2/shader");
-    #else
-        if(ofIsGLProgrammableRenderer()){
-            shader.load("shadersGL3/shader");
-        }else{
-            shader.load("shadersGL2/shader");
-        }
-    #endif*/
-    // loading vert & frag separately:
-    //shader.load("myCrazyVertFile.vert", "myCrazyFragFile.frag");
-    
     kinect.setRegistration(true);
     kinect.init(true); // shows infrared instead of RGB video Image
     kinect.open();
@@ -47,8 +34,8 @@ void ofApp::setup(){
     time0 = ofGetElapsedTimef(); // init time
     // beige (#FFF9EF)backgorund
     red = 255.0;
-    green = 249.0;
-    blue = 233.0;
+    green = 251.0;
+    blue = 214.0;
     // TODO: Play around with bg color to lower contrast (eye comfort)
     
     
@@ -129,12 +116,6 @@ void ofApp::setup(){
     xylophone.push_back(s_a);
     s_c2.load("do1.mp3");
     xylophone.push_back(s_c2);
-    //s_d2.load("re2.mp3");
-    //xylophone.push_back(s_d2);
-    //s_e2.load("mi2.mp3");
-    //xylophone.push_back(s_e2);
-    //s_g2.load("sol2.mp3");
-    //xylophone.push_back(s_g2);
     s_g0.load("sol0.mp3");
     xylophone.push_back(s_g0);
     s_f0.load("fa0.mp3");
@@ -143,40 +124,6 @@ void ofApp::setup(){
     curNote = 0;
     donePlaying = true;
     lastNum = 0;
-    
-    //============================= FLUID FIELD ==============
-    densityWidth = 1280;
-    densityHeight = 720;
-    // process all but the density on 16th resolution
-    simulationWidth = densityWidth / 2;
-    simulationHeight = densityHeight / 2;
-    
-    opticalFlow.setup(simulationWidth, simulationHeight);
-    velocityBridgeFlow.setup(simulationWidth, simulationHeight);
-    densityBridgeFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
-    temperatureBridgeFlow.setup(simulationWidth, simulationHeight);
-    fluidFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
-    
-    opticalFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
-    velocityBridgeFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
-    densityBridgeFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
-    temperatureBridgeFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
-    fluidFlow.setVisualizationFieldSize(glm::vec2(simulationWidth / 2, simulationHeight / 2));
-    fluidFlow.setBuoyancyWeight(0.8);
-    fluidFlow.setBuoyancySigma(0.06);
-    fluidFlow.setDissipationDen(0.25); //TODO: alter by installation distance
-    //fluidFlow.setBuoyancyAmbientTemperature(0.2);
-    
-    sand = true;
-    fbo.allocate(densityWidth, densityHeight);
-    ftUtil::zero(fbo); //clear fbo
-    
-    startFadeIn = false;
-    startFadeOut = false;
-    isFadingIn = false;
-    isFadingOut = false;
-    elapsedFadeTime = 0.0;
-    opacity = 255.0;
 }
 
 void ofApp::exit() {
@@ -187,37 +134,37 @@ void ofApp::exit() {
 //--------------------------------------------------------------
 void ofApp::update(){
     if(!ambientSound.isPlaying()) ambientSound.play();
-    if (!sand){
-        unsigned long newNum = contour.boundingRects.size();
-        if (lastNum > newNum && donePlaying){
-            unsigned long noteNum = xylophone.size();
-            int i1 = ofRandom(noteNum);
-            int i2 = ofRandom(noteNum);
-            int i3 = ofRandom(noteNum);
-            if (i1==i2) i2 = ofRandom(noteNum);
-            if (i2==i3) i3 = ofRandom(noteNum);
-            if (i1==i3) i3 = ofRandom(noteNum);
-            notei[0] = i1;
-            notei[1] = i2;
-            notei[2] = i3;
-            sort(notei, notei+3);
-            
-            donePlaying = false;
-        }
-        if (!donePlaying){
-            if (curNote >= 2){
-                xylophone[notei[2]].play();
-                curNote = 0;
-                donePlaying = true;
-                lastNum = contour.boundingRects.size();
-            } else {
-                xylophone[notei[curNote]].play();
-                curNote++;
-            }
-        } else {
-            lastNum = newNum;
-        }
+
+    unsigned long newNum = contour.boundingRects.size();
+    if (lastNum > newNum && donePlaying){
+        unsigned long noteNum = xylophone.size();
+        int i1 = ofRandom(noteNum);
+        int i2 = ofRandom(noteNum);
+        int i3 = ofRandom(noteNum);
+        if (i1==i2) i2 = ofRandom(noteNum);
+        if (i2==i3) i3 = ofRandom(noteNum);
+        if (i1==i3) i3 = ofRandom(noteNum);
+        notei[0] = i1;
+        notei[1] = i2;
+        notei[2] = i3;
+        sort(notei, notei+3);
+        
+        donePlaying = false;
     }
+    if (!donePlaying){
+        if (curNote >= 2){
+            xylophone[notei[2]].play();
+            curNote = 0;
+            donePlaying = true;
+            lastNum = contour.boundingRects.size();
+        } else {
+            xylophone[notei[curNote]].play();
+            curNote++;
+        }
+    } else {
+        lastNum = newNum;
+    }
+    
     //---------------------------------------------------- ^ SOUND ----
     
     // Compute dt
@@ -308,36 +255,10 @@ void ofApp::update(){
     // Update fluid
     fluid.update(dt, contour);
     
-    if (sand){
-        if (kinect.isFrameNew()){
-            fbo.begin();
-            kinect.draw(fbo.getWidth(), 0, -fbo.getWidth(), fbo.getHeight());  // draw flipped
-            fbo.end();
-            
-            opticalFlow.setInput(fbo.getTexture());
-        }
-        opticalFlow.update();
-        
-        velocityBridgeFlow.setVelocity(opticalFlow.getVelocity());
-        velocityBridgeFlow.update(dt);
-        densityBridgeFlow.setDensity(fbo.getTexture());
-        densityBridgeFlow.setVelocity(opticalFlow.getVelocity());
-        densityBridgeFlow.update(dt);
-        temperatureBridgeFlow.setDensity(fbo.getTexture());
-        temperatureBridgeFlow.setVelocity(opticalFlow.getVelocity());
-        temperatureBridgeFlow.update(dt);
-        
-        fluidFlow.addVelocity(velocityBridgeFlow.getVelocity());
-        fluidFlow.addDensity(densityBridgeFlow.getDensity());
-        fluidFlow.addTemperature(temperatureBridgeFlow.getTemperature());
-        fluidFlow.update(dt);
-    } else {
-        // Update particles
-        boidsParticles->update(dt,contour,fluid);
-    }
+    // Update particles
+    boidsParticles->update(dt,contour,fluid);
     
-    if(isFadingIn)fadeIn(dt, sand);
-    if(isFadingOut)fadeOut(dt, sand);
+    
 }
 
 //--------------------------------------------------------------
@@ -351,16 +272,6 @@ void ofApp::draw(){
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    if (sand){
-        ofClear(0);
-        ofPushStyle();
-        //ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-        //fbo.draw(0,0,windowWidth,windowHeight);
-        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-        ofSetColor(ofColor(200,130,50, opacity2));
-        fluidFlow.draw(0, 0, windowWidth, windowHeight);
-        ofPopStyle();
-    } else {
         ofPushMatrix();
         
         ofColor contourBg(red, green, blue);
@@ -389,18 +300,17 @@ void ofApp::draw(){
         if(drawFluid) {fluid.draw();}
         else {
             ofPushStyle();
-            ofSetColor(255,255,255,opacity);
+            ofSetColor(255,255,255,255);
             boidsParticles->draw();
             ofPopStyle();
             
         }
         ofPopMatrix();
-    }
+    
     
     if (drawContour){ // DEBUG
         ofPushStyle();
-        if (sand) ofSetColor(0);
-        else ofSetColor(0);
+        ofSetColor(0);
         stringstream reportStream;
         reportStream << "set near clipping " << nearClipping << " (press: k l)" << endl
             << "set far clipping " << farClipping << " (press: < >)" << endl
@@ -412,55 +322,7 @@ void ofApp::draw(){
             ofDrawBitmapString(reportStream.str(), 20, 100);
         ofPopStyle();
     }
-    /*
-    float gapW = 0; //TODO: Installation change side bars
-    ofPushStyle();
-    ofSetColor(255);
-    ofFill();
-    ofDrawRectangle(0, 0, gapW, windowHeight);
-    ofDrawRectangle(windowWidth-gapW, 0, gapW, windowHeight);
-    ofPopStyle();
-     */
     
-}
-
-
-void ofApp::fadeIn(float dt, bool sand){
-    if(startFadeIn){
-        startFadeIn = false;
-        elapsedFadeTime = 0.0;
-        if (sand) opacity = 0.0;
-        else opacity2 = 0.0;
-    }
-    else{
-        if (sand) opacity = ofMap(elapsedFadeTime, 0.0, 1.2, 0.0, 255.0, true);
-        else opacity2 = ofMap(elapsedFadeTime, 0.0, 1.2, 0.0, 220.0, true);
-        elapsedFadeTime += dt;
-        if(elapsedFadeTime > 1.2){
-            isFadingIn = false;
-            if (sand) opacity = 255.0;
-            else opacity2 = 220.0;
-        }
-    }
-}
-
-void ofApp::fadeOut(float dt, bool sand){
-    if(startFadeOut){
-        startFadeOut = false;
-        elapsedFadeTime = 0.0;
-        if (sand) opacity = 255.0;
-        else opacity2 = 220.0;
-    }
-    else{
-        if (sand) opacity = ofMap(elapsedFadeTime, 0.0, 1.2, 255.0, 0.0, true);
-        else opacity2 = ofMap(elapsedFadeTime, 0.0, 1.2, 220.0, 0.0, true);
-        elapsedFadeTime += dt;
-        if(elapsedFadeTime > 1.2){
-            isFadingOut = false;
-            if (sand) opacity = 0.0;
-            else opacity2 = 0.0;
-        }
-    }
 }
 
 
@@ -468,17 +330,17 @@ void ofApp::fadeOut(float dt, bool sand){
 void ofApp::keyPressed(int key){
     switch (key){
         case OF_KEY_UP:
-            if (angle < 30) {
+            if (angle < 30 && drawContour) {
                 ++angle;
             }
-            kinect.setCameraTiltAngle(angle);
+            if (drawContour) kinect.setCameraTiltAngle(angle);
             break;
 
         case OF_KEY_DOWN:
-            if (angle > -30) {
+            if (angle > -30 && drawContour) {
                 --angle;
             }
-            kinect.setCameraTiltAngle(angle);
+            if (drawContour) kinect.setCameraTiltAngle(angle);
             break;
         case 'k':
             if (drawContour) nearClipping-=10;
@@ -520,9 +382,6 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     switch (key){
-        case 'c':
-            boidsParticles->drawConnections = !boidsParticles->drawConnections;
-            break;
         case 'd':
             drawContour = !drawContour;
             break;
@@ -536,11 +395,6 @@ void ofApp::keyReleased(int key){
             break;
         case ' ':
             learnBg = true;
-            break;
-        case 's':
-            sand = !sand;
-            startFadeIn = true;
-            isFadingIn = true;
             break;
         default:
             break;
